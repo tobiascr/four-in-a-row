@@ -44,7 +44,7 @@ class EngineInterface():
                        best_value = value
                        best_move = move            
                 
-        if self.difficulty_level == 3:            
+        if self.difficulty_level == 3:
             return computer_move(game_state)
         
 class GameState:
@@ -259,10 +259,11 @@ def computer_move(game_state):
         depth = 4
    
     # Parallel computing is used for evaluating moves.
-    p = Pool()
-    result = p.map(evaluate_move_minimax,
-                   [[game_state, depth, i] for i in available_moves])
-    p.close()
+    #p = Pool()
+    #result = p.map(evaluate_move_minimax,
+    #               [[game_state, depth, i] for i in available_moves])
+    #p.close()
+    result = [evaluate_move_minimax([game_state, depth, i]) for i in available_moves]
 
     # Now find the best move based on the above computations.
     neutral_moves = []

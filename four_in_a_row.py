@@ -16,7 +16,7 @@ class MainWindow(tk.Tk):
         self.new_game_flag = False
         self.difficulty_level = tk.StringVar()
         self.difficulty_level.trace("w", self.set_difficulty_level)
-        self.difficulty_level.set("Medium")
+        self.difficulty_level.set("Hard")
 
     def set_difficulty_level(self, *args):
         self.title("Four in a row - " + self.difficulty_level.get())
