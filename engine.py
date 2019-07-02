@@ -1,5 +1,4 @@
 import random
-from multiprocessing import Pool
 
 class EngineInterface():
     """This class and the GameState class is intended to be the interface for this module.
@@ -10,42 +9,12 @@ class EngineInterface():
         self.difficulty_level = difficulty_level
 
     def engine_move(self, game_state):
-        if self.difficulty_level == 1:
-            return random_move(game_state)
+        if self.difficulty_level == 1:       
+            return computer_move_level_1(game_state)
         if self.difficulty_level == 2:            
-            if game_state.number_of_moves <= 1:
-                return random_move(game_state)
-            depth = 2
-            values = [evaluate_move_minimax([game_state, depth, i]) for i in game_state.available_moves()]
-            
-            # Now find the best move based on the above computations.
-            neutral_moves = []
-            best_value = -10000 * game_state.player_in_turn
-            for i in range(len(available_moves)):
-                if result[i] == 0:
-                    neutral_moves.append(available_moves[i])
-                # If maximizing player.
-                if game_state.player_in_turn == 1:
-                    if result[i] > best_value:
-                        best_value = result[i]
-                        best_move = available_moves[i]
-                # If minimizing player.
-                else:
-                    if result[i] < best_value:
-                        best_value = result[i]
-                        best_move = available_moves[i]
-                        
-            # If 0 is the best rating, then make a heuristic choise among the 0-rated moves.
-            if best_value == 0:
-               best_value = -10000
-               for move in neutral_moves:
-                   value = heuristic_value_1(game_state, move)
-                   if value > best_value:
-                       best_value = value
-                       best_move = move            
-                
+            return computer_move_level_2(game_state)                
         if self.difficulty_level == 3:
-            return computer_move(game_state)
+            return computer_move_level_3(game_state)
         
 class GameState:
     """Instances of this object stores game states. A game state is stored as
@@ -160,12 +129,6 @@ def win_last_move(game_state):
         return True
 
     return False
-
-def random_move(game_state):
-    """Return a randomly chosen move (0-6)."""
-    available_moves = game_state.available_moves()
-    
-    return available_moves[random.randrange(len(available_moves))]
      
 def minimax_value(game_state, depth):
     """Maximizes if the player in the last move is 1 and minimizes if -1."""        
@@ -175,7 +138,7 @@ def minimax_value(game_state, depth):
     elif game_state.number_of_moves == 42:
         value = 0
 
-    # If not terminal node, but depth 0, do a heuristic evaluation.
+    # If not terminal node, but depth 0.
     elif depth == 0:
         value = 0
 
@@ -221,8 +184,8 @@ def minimax_value(game_state, depth):
 
     return value
 
-def heuristic_value_random(game_state, move):
-    return random.random()
+def heuristic_value_constant(game_state, move):
+    return 0
 
 def heuristic_value_1(game_state, move):
     """Give a heuristic evaluation in form of a non-negative number
@@ -240,13 +203,29 @@ def evaluate_move_minimax(arg_list):
     game_state.make_move(move)
     value = minimax_value(game_state, depth)
     game_state.undo_last_move()
-    
+        
     return value
 
-def computer_move(game_state):
-    """Return a move computed by using the minimax algorithm
-    and heuristic evaluations.
+def heuristic_move(game_state, move_list, heuristic_function):
+    """Return a move from move_list that is given the highest value by
+    heuristic_function. It there are several such moves, then one of
+    them are chosen randomly.
     """
+    heuristic_values = [heuristic_function(game_state, move) for move in move_list]
+    max_value = max(heuristic_values)
+    best_moves = []
+    for i in range(len(move_list)):
+        if heuristic_values[i] == max_value:
+            best_moves.append(move_list[i])
+    return random.choice(best_moves)
+
+def computer_move_level_1(game_state):
+    return computer_move(game_state, 0, heuristic_value_constant)
+
+def computer_move_level_2(game_state):
+    return computer_move(game_state, 4, heuristic_value_constant)
+    
+def computer_move_level_3(game_state):
     available_moves = game_state.available_moves()
     
     # Depth for the minimax algorithm is chosen based
@@ -257,38 +236,30 @@ def computer_move(game_state):
         depth = 6
     if 5 <= len(available_moves):
         depth = 4
-   
-    # Parallel computing is used for evaluating moves.
-    #p = Pool()
-    #result = p.map(evaluate_move_minimax,
-    #               [[game_state, depth, i] for i in available_moves])
-    #p.close()
-    result = [evaluate_move_minimax([game_state, depth, i]) for i in available_moves]
-
-    # Now find the best move based on the above computations.
-    neutral_moves = []
-    best_value = -10000 * game_state.player_in_turn
-    for i in range(len(available_moves)):
-        if result[i] == 0:
-            neutral_moves.append(available_moves[i])
-        # If maximizing player.
-        if game_state.player_in_turn == 1:
-            if result[i] > best_value:
-                best_value = result[i]
-                best_move = available_moves[i]
-        # If minimizing player.
-        else:
-            if result[i] < best_value:
-                best_value = result[i]
-                best_move = available_moves[i]
-                
-    # If 0 is the best rating, then make a heuristic choise among the 0-rated moves.
-    if best_value == 0:
-       best_value = -10000
-       for move in neutral_moves:
-           value = heuristic_value_1(game_state, move)
-           if value > best_value:
-               best_value = value
-               best_move = move     
                               
-    return best_move
+    return computer_move(game_state, depth, heuristic_value_1)
+        
+def computer_move(game_state, depth, heuristic_function):
+    """Return a move computed by using the minimax algorithm
+    and heuristic evaluations.
+    """   
+    available_moves = game_state.available_moves()   
+    minimax_values = [evaluate_move_minimax([game_state, depth, i]) for i in available_moves]
+    
+    # If maximizing player.
+    if game_state.player_in_turn == 1:
+        best_value = max(minimax_values)
+    # If minimizing player.
+    else:
+        best_value = min(minimax_values)
+    best_move = available_moves[minimax_values.index(best_value)]
+                
+    # If 0 is the best rating, then make a heuristic choice among the 0-rated moves.
+    if best_value == 0:        
+        neutral_moves = [available_moves[i] for i in range(len(available_moves))
+                         if minimax_values[i] == 0]
+        best_move = heuristic_move(game_state, neutral_moves, heuristic_function)                              
+                
+    return best_move   
+    
+    
