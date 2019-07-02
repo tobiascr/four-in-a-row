@@ -17,6 +17,7 @@ class MainWindow(tk.Tk):
         self.difficulty_level = tk.StringVar()
         self.difficulty_level.trace("w", self.set_difficulty_level)
         self.difficulty_level.set("Medium")
+        self.player_make_first_move = True
 
     def set_difficulty_level(self, *args):
         self.title("Four in a row - " + self.difficulty_level.get())
@@ -27,17 +28,17 @@ class MainWindow(tk.Tk):
         elif self.difficulty_level.get() == "Hard":
             engine_interface.difficulty_level = 3   
 
+    def update_and_pause(self, time_in_ms):
+        self.board.unbind_mouse()
+        self.update_idletasks()                    
+        self.after(time_in_ms)
+        self.update() # Handle possible events.
+        self.board.rebind_mouse()
+
     def mouse_click(self, column_number):
         """This function is called if the column with column_number have been
         clicked on.
-        """
-        def update_and_pause(time_in_ms):
-            self.board.unbind_mouse()
-            self.update_idletasks()                    
-            self.after(time_in_ms)
-            self.update() # Handle possible events.
-            self.board.rebind_mouse()
-
+        """        
         # Player make a move, if there is empty places left in the column.
         column_height = game_state.column_height[column_number]
         if column_height < 6:
@@ -48,7 +49,7 @@ class MainWindow(tk.Tk):
         
         # If player win.
         if engine.win_last_move(game_state):
-            update_and_pause(1000)       
+            self.update_and_pause(1000)       
             dialog_box = DialogBox(main_window, "You win! Congratulations!")
             if self.new_game_flag:
                 self.new_game()            
@@ -56,7 +57,7 @@ class MainWindow(tk.Tk):
                 
         # If draw.
         if game_state.number_of_moves == 42:
-            update_and_pause(600)
+            self.update_and_pause(600)
             dialog_box = DialogBox(main_window, "Draw")
             if self.new_game_flag:
                 self.new_game()
@@ -67,12 +68,12 @@ class MainWindow(tk.Tk):
         # Engine makes a move
         column_number = engine_interface.engine_move(game_state)
         game_state.make_move(column_number)
-        update_and_pause(300)
+        self.update_and_pause(300)
         self.board.add_disk_to_column(column_number, self.engine_color)
 
         # If engine win.
         if engine.win_last_move(game_state):
-            update_and_pause(1000)
+            self.update_and_pause(1000)
             dialog_box = DialogBox(main_window, "Computer win!")
             if self.new_game_flag:
                 self.new_game()
@@ -82,7 +83,7 @@ class MainWindow(tk.Tk):
 
         # If draw.
         if game_state.number_of_moves == 42:      
-            update_and_pause(600)
+            self.update_and_pause(600)
             dialog_box = DialogBox(main_window, "Draw")          
             if self.new_game_flag:
                 self.new_game()
@@ -92,9 +93,15 @@ class MainWindow(tk.Tk):
         
     def new_game(self):
         self.new_game_flag = False
+        self.player_make_first_move = not self.player_make_first_move
         game_state.__init__()
         self.board.remove_disks()
 
+        if not self.player_make_first_move:
+            column_number = engine_interface.engine_move(game_state)
+            game_state.make_move(column_number)
+            self.update_and_pause(300)                     
+            self.board.add_disk_to_column(column_number, self.engine_color)            
         
 class Board(tk.Frame):
     def __init__(self, parent):
