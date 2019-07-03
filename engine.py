@@ -142,50 +142,35 @@ def minimax_value(game_state, depth):
     """Maximizes if the player in the last move is 1 and minimizes if -1."""        
     # If terminal node (win or board full).
     if win_last_move(game_state):
-        value = -(1000 + depth) * game_state.player_in_turn
-    elif game_state.number_of_moves == 42:
-        value = 0
+        return -(1000 + depth) * game_state.player_in_turn
+    if game_state.number_of_moves == 42:
+        return 0
 
     # If not terminal node, but depth 0.
-    elif depth == 0:
-        value = 0
+    if depth == 0:
+        return 0
 
     # Else, return a value based on child node values.
-    
-    # If maximizing player made the last move.
-    elif game_state.player_in_turn == -1:
-        values = []
-        available_moves = game_state.available_moves()
+    values = []
+    available_moves = game_state.available_moves()
 
-        # Testing central moves first combined with pruning saves time.
-        test_order = [3,2,4,1,5,0,6]
-        for move in test_order:
-            if move in available_moves:
-                game_state.make_move(move)
-                value = minimax_value(game_state, depth-1)
-                values.append(value)
-                game_state.undo_last_move()
-                                            
-        value = min(values)
+    # Testing central moves first combined with pruning saves time.
+    test_order = [3,2,4,1,5,0,6]
+    for move in test_order:
+        if move in available_moves:
+            game_state.make_move(move)
+            value = minimax_value(game_state, depth-1)
+            values.append(value)
+            game_state.undo_last_move()
+            
+    # If maximizing player made the last move.
+    if game_state.player_in_turn == -1:
+        return min(values)
 
     # If minimizing player made the last move.
     else:
-        values = []
-        available_moves = game_state.available_moves()
-        
-        # Testing central moves first combined with pruning saves time.
-        test_order = [3,2,4,1,5,0,6]
-        for move in test_order:
-            if move in available_moves:
-                game_state.make_move(move)
-                value = minimax_value(game_state, depth-1)
-                values.append(value)
-                game_state.undo_last_move()
-                                                    
-        value = max(values)
-        
-    return value
-
+        return max(values)       
+    
 def heuristic_value_constant(game_state, move):
     return 0
 
@@ -255,17 +240,12 @@ def computer_move(game_state, depth, heuristic_function):
     else:
         best_value = min(minimax_values)
     best_move = available_moves[minimax_values.index(best_value)]
-
-    print(available_moves)
-    print(minimax_values)
-    print(best_move)
-                
+                    
     # If 0 is the best rating, then make a heuristic choice among the 0-rated moves.
     if best_value == 0:        
         neutral_moves = [available_moves[i] for i in range(len(available_moves))
                          if minimax_values[i] == 0]
         best_move = heuristic_move(game_state, neutral_moves, heuristic_function)                              
                 
-    return best_move   
-    
-    
+    return best_move
+        
