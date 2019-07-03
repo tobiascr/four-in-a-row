@@ -79,8 +79,8 @@ class MainWindow(tk.Tk):
             if self.new_game_flag:
                 self.new_game()
             else:
-                self.destroy()               
-            return          
+                self.destroy()
+            return
 
         # If draw.
         if game_state.number_of_moves == 42:      

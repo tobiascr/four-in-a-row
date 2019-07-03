@@ -165,10 +165,7 @@ def minimax_value(game_state, depth):
                 value = minimax_value(game_state, depth-1)
                 values.append(value)
                 game_state.undo_last_move()
-
-                # Pruning
-                if value <= -1000: break
-            
+                                            
         value = min(values)
 
     # If minimizing player made the last move.
@@ -184,12 +181,9 @@ def minimax_value(game_state, depth):
                 value = minimax_value(game_state, depth-1)
                 values.append(value)
                 game_state.undo_last_move()
-        
-                # Pruning
-                if value >= 1000: break
-            
+                                                    
         value = max(values)
-
+        
     return value
 
 def heuristic_value_constant(game_state, move):
@@ -261,6 +255,10 @@ def computer_move(game_state, depth, heuristic_function):
     else:
         best_value = min(minimax_values)
     best_move = available_moves[minimax_values.index(best_value)]
+
+    print(available_moves)
+    print(minimax_values)
+    print(best_move)
                 
     # If 0 is the best rating, then make a heuristic choice among the 0-rated moves.
     if best_value == 0:        
