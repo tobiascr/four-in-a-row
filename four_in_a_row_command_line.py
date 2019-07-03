@@ -1,5 +1,6 @@
 
-import engine
+from engine import EngineInterface
+from engine import GameState
 
 def draw_board(game_state, white):
     """White (1 or -1) tells which of 1 and -1 that is drawn in white color.
@@ -27,8 +28,19 @@ if __name__ == "__main__":
     print()
 
     while True:
+        answer = input("Difficulty level (1-3): ")
+        if answer == "1" or answer == "2" or answer == "3":
+            difficulty = int(answer)
+            engine_interface = EngineInterface(difficulty)    
+            print()
+            break
+        elif answer == "q":
+            exit_program = True           
+            break
+
+    while True:
         if new_game:
-            game_state = engine.GameState()           
+            game_state = GameState()           
             player_win = False
             computer_win = False
             computer_in_turn = computer_begin
@@ -44,9 +56,9 @@ if __name__ == "__main__":
 
         if computer_in_turn:
             # Computer makes a move
-            move = engine.computer_move(game_state)
+            move = engine_interface.engine_move(game_state)
             game_state.make_move(move)
-            if engine.win_last_move(game_state):
+            if engine_interface.four_in_a_row(game_state):
                 computer_win = True
         else:
             # Player makes a move
@@ -59,7 +71,7 @@ if __name__ == "__main__":
                         move = int(move_str)
                     if game_state.column_height[move] < 6:
                         game_state.make_move(move)
-                        if engine.win_last_move(game_state):
+                        if engine_interface.four_in_a_row(game_state):
                             player_win = True
                         print()                       
                         break

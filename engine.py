@@ -1,5 +1,6 @@
 import random
 
+
 class EngineInterface():
     """This class and the GameState class is intended to be the interface for this module.
     """    
@@ -8,13 +9,20 @@ class EngineInterface():
         """
         self.difficulty_level = difficulty_level
 
+    def four_in_a_row(self, game_state):
+        """Return true if and only the last move made four in a row."""
+        return win_last_move(game_state)
+
     def engine_move(self, game_state):
+        """Return an integer from 0 to 6 that represents a move made
+        by the engine."""
         if self.difficulty_level == 1:       
             return computer_move_level_1(game_state)
         if self.difficulty_level == 2:            
             return computer_move_level_2(game_state)                
         if self.difficulty_level == 3:
             return computer_move_level_3(game_state)
+
         
 class GameState:
     """Instances of this object stores game states. A game state is stored as
@@ -60,7 +68,7 @@ class GameState:
 
     
 def win_last_move(game_state):
-    """True iff the last move made gives 4 in a row."""
+    """True iff the last move made gives four in a row."""
     col = game_state.move_sequence[-1]
     player_in_last_move = -game_state.player_in_turn
         

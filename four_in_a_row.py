@@ -1,5 +1,6 @@
 import tkinter as tk
-import engine
+from engine import EngineInterface
+from engine import GameState
 
 
 class MainWindow(tk.Tk):
@@ -48,7 +49,7 @@ class MainWindow(tk.Tk):
             return
         
         # If player win.
-        if engine.win_last_move(game_state):
+        if engine_interface.four_in_a_row(game_state):
             self.update_and_pause(1000)       
             dialog_box = DialogBox(main_window, "You win! Congratulations!")
             if self.new_game_flag:
@@ -72,7 +73,7 @@ class MainWindow(tk.Tk):
         self.board.add_disk_to_column(column_number, self.engine_color)
 
         # If engine win.
-        if engine.win_last_move(game_state):
+        if engine_interface.four_in_a_row(game_state):
             self.update_and_pause(1000)
             dialog_box = DialogBox(main_window, "Computer win!")
             if self.new_game_flag:
@@ -255,7 +256,7 @@ class DialogBox(tk.Toplevel):
     def quit(self, event=None):
         self.parent.destroy()
                       
-game_state = engine.GameState()
-engine_interface = engine.EngineInterface(2)                    
+game_state = GameState()
+engine_interface = EngineInterface(2)                    
 main_window = MainWindow()
 main_window.mainloop()
