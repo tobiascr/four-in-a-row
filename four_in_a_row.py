@@ -15,10 +15,13 @@ class MainWindow(tk.Tk):
         self.engine_color = "red"
         self.engine_highlight_color = "#DDDDDD"
         self.new_game_flag = False
+        self.destroyed = False
         self.difficulty_level = tk.StringVar()
         self.difficulty_level.trace("w", self.set_difficulty_level)
         self.difficulty_level.set("Medium")
         self.player_make_first_move = True
+        self.protocol("WM_DELETE_WINDOW", self.close_window)
+
 
     def set_difficulty_level(self, *args):
         self.title("Four in a row - " + self.difficulty_level.get())
@@ -53,7 +56,9 @@ class MainWindow(tk.Tk):
             self.update_and_pause(1000)       
             dialog_box = DialogBox(main_window, "You win! Congratulations!")
             if self.new_game_flag:
-                self.new_game()            
+                self.new_game()
+            elif not self.destroyed:
+                self.destroy()
             return
                 
         # If draw.
@@ -62,7 +67,7 @@ class MainWindow(tk.Tk):
             dialog_box = DialogBox(main_window, "Draw")
             if self.new_game_flag:
                 self.new_game()
-            else:
+            elif not self.destroyed:
                 self.destroy()          
             return
 
@@ -78,7 +83,7 @@ class MainWindow(tk.Tk):
             dialog_box = DialogBox(main_window, "Computer win!")
             if self.new_game_flag:
                 self.new_game()
-            else:
+            elif not self.destroyed:
                 self.destroy()
             return
 
@@ -88,8 +93,8 @@ class MainWindow(tk.Tk):
             dialog_box = DialogBox(main_window, "Draw")          
             if self.new_game_flag:
                 self.new_game()
-            else:
-                self.destroy()           
+            elif not self.destroyed:
+                self.destroy()        
             return
         
     def new_game(self):
@@ -103,7 +108,12 @@ class MainWindow(tk.Tk):
             game_state.make_move(column_number)
             self.update_and_pause(300)                     
             self.board.add_disk_to_column(column_number, self.engine_color)            
+
+    def close_window(self):
+        self.destroyed = True
+        self.destroy()
         
+    
 class Board(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
@@ -135,7 +145,7 @@ class Board(tk.Frame):
 
 class Column(tk.Frame):
     def __init__(self, parent, column_number):
-        """column_number is 0,1 to 6 and is used as an identifier."""  
+        """column_number is 0,1 to 6 and is used as an identifier."""
         tk.Frame.__init__(self, parent)
         self.parent = parent
         self.column_number = column_number
@@ -246,15 +256,14 @@ class DialogBox(tk.Toplevel):
                   command=self.quit).pack()
         self.bind("<Return>", self.play)
         self.bind("<Escape>", self.quit)
-        self.protocol("WM_DELETE_WINDOW", self.quit) # If the dialog box is closed.
-        parent.wait_window(window=self)   
+        parent.wait_window(window=self)
            
     def play(self, event=None):        
         self.parent.new_game_flag = True
         self.destroy()
             
     def quit(self, event=None):
-        self.parent.destroy()
+        self.destroy()
                       
 game_state = GameState()
 engine_interface = EngineInterface(2)                    
