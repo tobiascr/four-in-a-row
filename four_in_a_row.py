@@ -22,8 +22,14 @@ class MainWindow(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.close_window)
 
     def new_game_dialog_box(self):
+        self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window    
         dialog_box = DialogBox(main_window, "New game")
-       
+        if self.new_game_flag:
+            self.new_game_flag = False
+            self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window            
+        else:
+            self.destroy()
+               
     def set_difficulty_level(self, *args):
         self.title("Four in a row - " + self.difficulty_level.get())
         if self.difficulty_level.get() == "Easy":
@@ -44,7 +50,7 @@ class MainWindow(tk.Tk):
         """This function is called if the column with column_number have been
         clicked on.
         """
-        self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window        
+        self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window
         
         # Player make a move, if there is empty places left in the column.
         column_height = game_state.column_height[column_number]
@@ -97,7 +103,7 @@ class MainWindow(tk.Tk):
             return
 
         # If draw.
-        if game_state.number_of_moves == 42:      
+        if game_state.number_of_moves == 42:   
             self.update_and_pause(600)
             dialog_box = DialogBox(main_window, "Draw")          
             if self.new_game_flag:
