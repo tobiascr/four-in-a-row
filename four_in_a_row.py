@@ -15,7 +15,6 @@ class MainWindow(tk.Tk):
         self.engine_color = "red"
         self.engine_highlight_color = "#DDDDDD"
         self.new_game_flag = False
-        self.destroyed = False
         self.difficulty_level = tk.StringVar()
         self.difficulty_level.trace("w", self.set_difficulty_level)
         self.difficulty_level.set("Medium")
@@ -61,7 +60,7 @@ class MainWindow(tk.Tk):
             if self.new_game_flag:
                 self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window            
                 self.new_game()
-            elif not self.destroyed:
+            else:
                 self.destroy()
             return
                 
@@ -72,7 +71,7 @@ class MainWindow(tk.Tk):
             if self.new_game_flag:
                 self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
                 self.new_game()
-            elif not self.destroyed:
+            else:
                 self.destroy()
             return
 
@@ -90,7 +89,7 @@ class MainWindow(tk.Tk):
             if self.new_game_flag:
                 self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window            
                 self.new_game()
-            elif not self.destroyed:
+            else:
                 self.destroy()            
             return
 
@@ -101,7 +100,7 @@ class MainWindow(tk.Tk):
             if self.new_game_flag:
                 self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
                 self.new_game()
-            elif not self.destroyed:
+            else:
                 self.destroy()
             return
 
@@ -132,7 +131,6 @@ class MainWindow(tk.Tk):
         pass
 
     def close_window(self):
-        self.destroyed = True
         self.destroy()
         
     
