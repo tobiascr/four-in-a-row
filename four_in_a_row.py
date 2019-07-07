@@ -21,6 +21,9 @@ class MainWindow(tk.Tk):
         self.player_make_first_move = True
         self.protocol("WM_DELETE_WINDOW", self.close_window)
 
+    def new_game_dialog_box(self):
+        dialog_box = DialogBox(main_window, "New game")
+       
     def set_difficulty_level(self, *args):
         self.title("Four in a row - " + self.difficulty_level.get())
         if self.difficulty_level.get() == "Easy":
@@ -300,4 +303,5 @@ class DialogBox(tk.Toplevel):
 game_state = GameState()
 engine_interface = EngineInterface(2)                    
 main_window = MainWindow()
+main_window.new_game_dialog_box()
 main_window.mainloop()
