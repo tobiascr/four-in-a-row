@@ -13,30 +13,37 @@ class MainWindow(tk.Tk):
         self.player_color = "yellow"
         self.engine_color = "red"
         self.new_game_flag = False
-        self.difficulty_level = tk.StringVar()
-        self.difficulty_level.trace("w", self.set_difficulty_level)
+        self.difficulty_level = tk.StringVar()        
         self.difficulty_level.set("Medium")
         self.player_make_first_move = True
         self.protocol("WM_DELETE_WINDOW", self.close_window)
+        self.score = [0, 0]
+        self.title("Four in a row: 0 - 0")
 
     def new_game_dialog_box(self):
         self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window    
         dialog_box = DialogBox(main_window, "New game")
         if self.new_game_flag:
             self.new_game_flag = False
-            self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window            
+            self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window     
         else:
             self.destroy()
                
-    def set_difficulty_level(self, *args):
-        self.title("Four in a row - " + self.difficulty_level.get())
+    def update_difficulty_level(self, *args):
+        current_level = engine_interface.difficulty_level
         if self.difficulty_level.get() == "Easy":
             engine_interface.difficulty_level = 1
         elif self.difficulty_level.get() == "Medium":
             engine_interface.difficulty_level = 2
         elif self.difficulty_level.get() == "Hard":
-            engine_interface.difficulty_level = 3   
-
+            engine_interface.difficulty_level = 3                             
+        if engine_interface.difficulty_level != current_level:
+            self.score = [0, 0]
+            self.title_update()
+        
+    def title_update(self):
+        self.title("Four in a row: " + str(self.score[0]) + " - " + str(self.score[1]))
+        
     def update_and_pause(self, time_in_ms):
         self.board.unbind_mouse()
         self.update_idletasks()                    
@@ -61,11 +68,13 @@ class MainWindow(tk.Tk):
         
         # If player win.
         if engine_interface.four_in_a_row(game_state):
+            self.score[0] += 1
+            self.title_update()
             self.highlight_four_in_a_row(self.player_color)
             self.update_and_pause(1000)
-            dialog_box = DialogBox(main_window, "You win! Congratulations!")
+            dialog_box = DialogBox(main_window, "You win! Congratulations!")            
             if self.new_game_flag:
-                self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window            
+                self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
                 self.new_game()
             else:
                 self.destroy()
@@ -90,6 +99,8 @@ class MainWindow(tk.Tk):
 
         # If engine win.
         if engine_interface.four_in_a_row(game_state):
+            self.score[1] += 1
+            self.title_update()
             self.highlight_four_in_a_row(self.engine_color)
             self.update_and_pause(1000)
             dialog_box = DialogBox(main_window, "Computer win!")
@@ -258,7 +269,7 @@ class DialogBox(tk.Toplevel):
         box_width = 300
         box_height = 120
 
-        parent_width = parent.winfo_width()        
+        parent_width = parent.winfo_width()
         parent_height = parent.winfo_height()
         
         if box_width >= parent_width:
@@ -274,7 +285,7 @@ class DialogBox(tk.Toplevel):
     
         text = tk.Label(self, text=text, font=("", 11, "bold"), borderwidth=10)
         text.pack()
-    
+
         radio_button_frame = tk.Frame(master=self)
         tk.Radiobutton(radio_button_frame, text="Easy", font=("", 10),
                        variable=parent.difficulty_level, value="Easy").pack(side=tk.LEFT)
@@ -283,7 +294,7 @@ class DialogBox(tk.Toplevel):
         tk.Radiobutton(radio_button_frame, text="Hard", font=("", 10),
                        variable=parent.difficulty_level, value="Hard").pack()
         radio_button_frame.pack()
-    
+
         button_frame = tk.Frame(master=self, pady=10)
         button_frame.pack()
         tk.Button(button_frame, text="Play", font=("", 10), width=8,
@@ -294,8 +305,9 @@ class DialogBox(tk.Toplevel):
         self.bind("<Escape>", self.quit)
         parent.wait_window(window=self)
            
-    def play(self, event=None):        
+    def play(self, event=None):
         self.parent.new_game_flag = True
+        self.parent.update_difficulty_level()
         self.destroy()
             
     def quit(self, event=None):
