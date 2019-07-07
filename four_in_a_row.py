@@ -11,9 +11,7 @@ class MainWindow(tk.Tk):
         self.board = Board(self)
         self.board.pack()
         self.player_color = "yellow"
-        self.player_highlight_color = "#FF00FF"
         self.engine_color = "red"
-        self.engine_highlight_color = "#DDDDDD"
         self.new_game_flag = False
         self.difficulty_level = tk.StringVar()
         self.difficulty_level.trace("w", self.set_difficulty_level)
@@ -239,10 +237,7 @@ class Cell(tk.Canvas):
 
     def remove_disk(self):   
         self.itemconfig(self.disk, fill=self.background_color)
-
-    def highlight(self, color):
-        self.itemconfig(self.disk, outline=color, width=5)
-
+        
     def unbind_mouse(self):
         self.unbind("<Button-1>")
         
