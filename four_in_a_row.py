@@ -22,7 +22,6 @@ class MainWindow(tk.Tk):
         self.player_make_first_move = True
         self.protocol("WM_DELETE_WINDOW", self.close_window)
 
-
     def set_difficulty_level(self, *args):
         self.title("Four in a row - " + self.difficulty_level.get())
         if self.difficulty_level.get() == "Easy":
@@ -42,20 +41,25 @@ class MainWindow(tk.Tk):
     def mouse_click(self, column_number):
         """This function is called if the column with column_number have been
         clicked on.
-        """        
+        """
+        self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window        
+        
         # Player make a move, if there is empty places left in the column.
         column_height = game_state.column_height[column_number]
         if column_height < 6:
             game_state.make_move(column_number)
-            self.board.add_disk_to_column(column_number, self.player_color)
+            self.board.add_disk_to_top_of_column(column_number, self.player_color)
         else:
+            self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
             return
         
         # If player win.
         if engine_interface.four_in_a_row(game_state):
-            self.update_and_pause(1000)       
+            self.highlight_four_in_a_row(self.player_color)
+            self.update_and_pause(1000)
             dialog_box = DialogBox(main_window, "You win! Congratulations!")
             if self.new_game_flag:
+                self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window            
                 self.new_game()
             elif not self.destroyed:
                 self.destroy()
@@ -66,25 +70,28 @@ class MainWindow(tk.Tk):
             self.update_and_pause(600)
             dialog_box = DialogBox(main_window, "Draw")
             if self.new_game_flag:
+                self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
                 self.new_game()
             elif not self.destroyed:
-                self.destroy()          
+                self.destroy()
             return
 
         # Engine makes a move
         column_number = engine_interface.engine_move(game_state)
         game_state.make_move(column_number)
         self.update_and_pause(300)
-        self.board.add_disk_to_column(column_number, self.engine_color)
+        self.board.add_disk_to_top_of_column(column_number, self.engine_color)
 
         # If engine win.
         if engine_interface.four_in_a_row(game_state):
+            self.highlight_four_in_a_row(self.engine_color)
             self.update_and_pause(1000)
             dialog_box = DialogBox(main_window, "Computer win!")
             if self.new_game_flag:
+                self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window            
                 self.new_game()
             elif not self.destroyed:
-                self.destroy()
+                self.destroy()            
             return
 
         # If draw.
@@ -92,22 +99,37 @@ class MainWindow(tk.Tk):
             self.update_and_pause(600)
             dialog_box = DialogBox(main_window, "Draw")          
             if self.new_game_flag:
+                self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
                 self.new_game()
             elif not self.destroyed:
-                self.destroy()        
+                self.destroy()
             return
+
+        self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
+    
+    def highlight_four_in_a_row(self, color):     
+        positions = engine_interface.four_in_a_row_positions(game_state)        
+        self.update_and_pause(500)
+        for (column, row) in positions:
+            self.board.remove_disk(column, row)
+        self.update_and_pause(500)
+        for (column, row) in positions:
+            self.board.add_disk(column, row, color)
         
     def new_game(self):
         self.new_game_flag = False
         self.player_make_first_move = not self.player_make_first_move
         game_state.__init__()
-        self.board.remove_disks()
+        self.board.remove_all_disks()
 
         if not self.player_make_first_move:
             column_number = engine_interface.engine_move(game_state)
             game_state.make_move(column_number)
             self.update_and_pause(300)                     
-            self.board.add_disk_to_column(column_number, self.engine_color)            
+            self.board.add_disk_to_top_of_column(column_number, self.engine_color)            
+
+    def dont_close_window(self):
+        pass
 
     def close_window(self):
         self.destroyed = True
@@ -127,13 +149,19 @@ class Board(tk.Frame):
     def mouse_click(self, column_number):
         self.parent.mouse_click(column_number)      
 
-    def add_disk_to_column(self, column_number, color):
+    def add_disk_to_top_of_column(self, column_number, color):
         """column_number is 0,1 to 6."""
-        self.column_list[column_number].add_disk_to_column(color)
+        self.column_list[column_number].add_disk_to_top_of_column(color)
 
-    def remove_disks(self):
+    def add_disk(self, column, row, color):
+        self.column_list[column].add_disk(row, color)
+
+    def remove_disk(self, column, row):
+        self.column_list[column].remove_disk(row)
+
+    def remove_all_disks(self):
         for column in self.column_list:
-            column.remove_disks()
+            column.remove_all_disks()
 
     def unbind_mouse(self):
         for column in self.column_list:
@@ -159,11 +187,17 @@ class Column(tk.Frame):
     def mouse_click(self, event):
         self.parent.mouse_click(self.column_number)
 
-    def add_disk_to_column(self, color):
+    def add_disk_to_top_of_column(self, color):
         self.column[self.disks_in_column].add_disk(color)
         self.disks_in_column += 1
 
-    def remove_disks(self):
+    def add_disk(self, row, color):
+        self.column[row].add_disk(color)
+
+    def remove_disk(self, row):
+        self.column[row].remove_disk()
+
+    def remove_all_disks(self):
         self.disks_in_column = 0   
         for cell in self.column:
             cell.remove_disk()
@@ -196,7 +230,7 @@ class Cell(tk.Canvas):
     def add_disk(self, color):
         self.itemconfig(self.disk, fill=color)
 
-    def remove_disk(self):        
+    def remove_disk(self):   
         self.itemconfig(self.disk, fill=self.background_color)
 
     def highlight(self, color):

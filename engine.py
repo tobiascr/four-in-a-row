@@ -12,7 +12,60 @@ class EngineInterface():
     def four_in_a_row(self, game_state):
         """Return true if and only the last move made four in a row."""
         return win_last_move(game_state)
+        
+    def four_in_a_row_positions(self, game_state):
+        """Return all positions on the board that have disks included in a four in a row.
+        Positions are given as a set of (column, row)-pairs.
+        """
+        def disk_type(column, row):
+            return game_state.columns[column][row]
+        
+        def disks_are_of_same_type(col_row_pair_set):
+            type_ = None
+            all_equal = True      
+            for (column, row) in col_row_pair_set:
+                if type_ == None:
+                    type_ = disk_type(column, row)            
+                if type_ == 0:
+                    return False
+                if disk_type(column, row) != type_:
+                    all_equal = False
+            return all_equal
+                
+        possible_four_in_a_rows = []
+        
+        # Columns.
+        for col in range(7):
+            for row in range(3):
+                col_row_pair_set = {(col, row), (col, row + 1),
+                                    (col, row + 2), (col, row + 3)}
+                possible_four_in_a_rows.append(col_row_pair_set)                                    
+                
+        # Rows.                
+        for col in range(4):
+            for row in range(6):
+                col_row_pair_set = {(col, row), (col + 1, row),
+                                    (col + 2, row), (col + 3, row)}
+                possible_four_in_a_rows.append(col_row_pair_set)
 
+        # Diagonals.
+        for col in range(4):
+            for row in range(3):
+                col_row_pair_set = {(col, row), (col + 1, row + 1),
+                                    (col + 2, row + 2), (col + 3, row + 3)}
+                possible_four_in_a_rows.append(col_row_pair_set)
+                                             
+                col_row_pair_set = {(col, row + 3), (col + 1, row + 2),
+                                    (col + 2, row + 1), (col + 3, row)}
+                possible_four_in_a_rows.append(col_row_pair_set)
+        
+        four_in_a_rows = set()
+        for col_row_pair_set in possible_four_in_a_rows:
+            if disks_are_of_same_type(col_row_pair_set):
+                four_in_a_rows |= col_row_pair_set
+        
+        return four_in_a_rows
+    
     def engine_move(self, game_state):
         """Return an integer from 0 to 6 that represents a move made
         by the engine."""
@@ -58,14 +111,6 @@ class GameState:
         self.player_in_turn = -self.player_in_turn
         self.number_of_moves -= 1
         
-    def four_in_a_row_positions():
-        """Return a list of (row, column) pairs for the positions that gives one
-        or several four rows. It is assumed that the player that made the last move
-        made a winning move. The list of positions is useful for highlighting
-        the disks that made a four in a row in a GUI.
-        """
-        pass        
-
     
 def win_last_move(game_state):
     """True iff the last move made gives four in a row."""
