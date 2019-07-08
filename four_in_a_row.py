@@ -14,13 +14,13 @@ class MainWindow(tk.Tk):
         self.engine_color = "red"
         self.new_game_flag = False
         self.difficulty_level = tk.StringVar()        
-        self.difficulty_level.set("Medium")
+        self.difficulty_level.set("Medium")    
         self.player_make_first_move = True
         self.protocol("WM_DELETE_WINDOW", self.close_window)
         self.score = [0, 0]
         self.title("Four in a row: 0 - 0")
 
-    def new_game_dialog_box(self):
+    def new_game_dialog_box(self):    
         self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window    
         dialog_box = DialogBox(main_window, "New game")
         if self.new_game_flag:
@@ -30,13 +30,15 @@ class MainWindow(tk.Tk):
             self.destroy()
                
     def update_difficulty_level(self, *args):
+        """Update the difficulty level in the engine and reset score if
+        the level is changed."""
         current_level = engine_interface.difficulty_level
         if self.difficulty_level.get() == "Easy":
             engine_interface.difficulty_level = 1
         elif self.difficulty_level.get() == "Medium":
             engine_interface.difficulty_level = 2
         elif self.difficulty_level.get() == "Hard":
-            engine_interface.difficulty_level = 3                             
+            engine_interface.difficulty_level = 3
         if engine_interface.difficulty_level != current_level:
             self.score = [0, 0]
             self.title_update()
@@ -265,6 +267,7 @@ class DialogBox(tk.Toplevel):
         self.transient(parent)
         self.wait_visibility() # Window needs to be visible for the grab.
         self.grab_set() # Routes all events for this application to this widget.
+        self.focus_set()
         self.title("Four in a row")
         box_width = 300
         box_height = 120
@@ -316,5 +319,6 @@ class DialogBox(tk.Toplevel):
 game_state = GameState()
 engine_interface = EngineInterface(2)                    
 main_window = MainWindow()
+main_window.update()
 main_window.new_game_dialog_box()
 main_window.mainloop()
