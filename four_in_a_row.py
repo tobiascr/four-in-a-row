@@ -7,7 +7,7 @@ class MainWindow(tk.Tk):
 
     def __init__(self):
         tk.Tk.__init__(self)
-        self.resizable(False, False)         
+        self.resizable(False, False)     
         self.board = Board(self)
         self.board.pack()
         self.player_color = "yellow"
@@ -19,7 +19,7 @@ class MainWindow(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.close_window)
         self.score = [0, 0]
         self.title("Four in a row: 0 - 0")
-
+        
     def new_game_dialog_box(self):    
         self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window    
         dialog_box = DialogBox(main_window, "New game")
@@ -96,7 +96,7 @@ class MainWindow(tk.Tk):
         # Engine makes a move
         column_number = engine_interface.engine_move(game_state)
         game_state.make_move(column_number)
-        self.update_and_pause(300)
+        self.update_and_pause(50) # 300 is good if without animations.
         self.board.add_disk_to_top_of_column(column_number, self.engine_color)
 
         # If engine win.
@@ -198,7 +198,7 @@ class Column(tk.Frame):
         self.disks_in_column = 0
         self.column = []
         for cell in range(6):
-            new_cell = Cell(self, 100)
+            new_cell = Cell(self, 90)
             new_cell.pack(side=tk.BOTTOM)
             self.column.append(new_cell)
 
@@ -206,7 +206,18 @@ class Column(tk.Frame):
         self.parent.mouse_click(self.column_number)
 
     def add_disk_to_top_of_column(self, color):
-        self.column[self.disks_in_column].add_disk(color)
+        time_in_each_row = [0.41421356237309515, 0.31783724519578205, 0.2679491924311228,
+                            0.2360679774997898, 0.21342176528338808]
+        self.add_disk(5, color)
+        self.update_idletasks()
+        row = 4
+        while row >= self.disks_in_column:
+
+            self.after(round(150*time_in_each_row[row]))
+            self.remove_disk(row + 1)
+            self.add_disk(row, color)
+            self.update_idletasks()            
+            row -=1
         self.disks_in_column += 1
 
     def add_disk(self, row, color):
