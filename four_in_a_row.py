@@ -19,7 +19,7 @@ class MainWindow(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.close_window)
         self.score = [0, 0]
         self.title("Four in a row: 0 - 0")
-        self.animations = False
+        self.animations = True
         
     def new_game_dialog_box(self):    
         self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window    
@@ -211,18 +211,24 @@ class Column(tk.Frame):
 
     def add_disk_to_top_of_column(self, color, animations):
         """animations is True or False."""
-        if animations:
+        if animations:            
             time_in_each_row = [0.41421356237309515, 0.31783724519578205, 0.2679491924311228,
                                 0.2360679774997898, 0.21342176528338808]
+            total_time = 0
+            min_time = 250                          
             self.add_disk(5, color)
             self.update_idletasks()
             row = 4
-            while row >= self.disks_in_column:    
-                self.after(round(150*time_in_each_row[row]))
+            while row >= self.disks_in_column:
+                pause_time = round(165*time_in_each_row[row])
+                self.after(pause_time)
+                total_time += pause_time
                 self.remove_disk(row + 1)
                 self.add_disk(row, color)
                 self.update_idletasks()            
-                row -=1               
+                row -=1
+            if total_time < min_time:
+                self.after(min_time - total_time)  
         else:
             self.add_disk(self.disks_in_column, color)
         self.disks_in_column += 1
