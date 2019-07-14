@@ -26,7 +26,7 @@ class MainWindow(tk.Tk):
         dialog_box = DialogBox(main_window, "New game")
         if self.new_game_flag:
             self.new_game_flag = False
-            self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window     
+            self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
         else:
             self.destroy()
                
@@ -57,7 +57,15 @@ class MainWindow(tk.Tk):
     def mouse_click(self, column_number):
         """This function is called if the column with column_number have been
         clicked on.
-        """
+        """        
+        def dialog(text):
+            dialog_box = DialogBox(main_window, text)        
+            if self.new_game_flag:
+                self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
+                self.new_game()
+            else:
+                self.destroy()   
+                
         self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window
         
         # Player make a move, if there is empty places left in the column.
@@ -75,23 +83,13 @@ class MainWindow(tk.Tk):
             self.title_update()
             self.highlight_four_in_a_row(self.player_color)
             self.update_and_pause(1000)
-            dialog_box = DialogBox(main_window, "You win! Congratulations!")            
-            if self.new_game_flag:
-                self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
-                self.new_game()
-            else:
-                self.destroy()
+            dialog("You win! Congratulations!")
             return
                 
         # If draw.
         if game_state.number_of_moves == 42:
             self.update_and_pause(600)
-            dialog_box = DialogBox(main_window, "Draw")
-            if self.new_game_flag:
-                self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
-                self.new_game()
-            else:
-                self.destroy()
+            dialog("Draw")
             return
 
         # Engine makes a move
@@ -100,7 +98,7 @@ class MainWindow(tk.Tk):
         if self.animations:
             self.update_and_pause(50)
         else:
-            self.update_and_pause(300)                       
+            self.update_and_pause(300)
         self.board.add_disk_to_top_of_column(column_number, self.engine_color, self.animations)
 
         # If engine win.
@@ -109,23 +107,13 @@ class MainWindow(tk.Tk):
             self.title_update()
             self.highlight_four_in_a_row(self.engine_color)
             self.update_and_pause(1000)
-            dialog_box = DialogBox(main_window, "Computer win!")
-            if self.new_game_flag:
-                self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window            
-                self.new_game()
-            else:
-                self.destroy()            
+            dialog("Computer win!")
             return
 
         # If draw.
         if game_state.number_of_moves == 42:   
             self.update_and_pause(600)
-            dialog_box = DialogBox(main_window, "Draw")          
-            if self.new_game_flag:
-                self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
-                self.new_game()
-            else:
-                self.destroy()
+            dialog("Draw")            
             return
 
         self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window

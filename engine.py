@@ -84,7 +84,7 @@ class GameState:
     where 1 always make the first move. The first entries in the column lists corresponds to the
     bottom positions. Some extra data are stored here that can be derived from
     the game state, which can help to make some algorithms faster.
-    """    
+    """
     def __init__(self):
         self.columns = [[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
                           [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]]
