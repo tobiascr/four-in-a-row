@@ -5,8 +5,7 @@ class EngineInterface():
     """This class and the GameState class is intended to be the interface for this module.
     """    
     def __init__(self, difficulty_level):
-        """difficulty_level can be 1, 2 or 3.
-        """
+        """difficulty_level can be 1, 2 or 3."""
         self.difficulty_level = difficulty_level
 
     def four_in_a_row(self, game_state):
@@ -235,7 +234,7 @@ def evaluate_move_minimax(arg_list):
     game_state.make_move(move)
     value = minimax_value(game_state, depth)
     game_state.undo_last_move()
-        
+            
     return value
 
 def heuristic_move(game_state, move_list, heuristic_function):
@@ -253,7 +252,8 @@ def heuristic_move(game_state, move_list, heuristic_function):
 
 def blocking_move(game_state):
     """Return a move that blocks an immediate four in a row for the opponent if
-    such move exist. Else return None."""
+    such move exist. Else return None.
+    """
     available_moves = game_state.available_moves() 
     for col in [3,2,4,1,5,0,6]:
         if col in available_moves:
@@ -284,7 +284,7 @@ def computer_move_level_3(game_state):
         depth = 6
     if 5 <= len(available_moves):
         depth = 4
-                              
+        
     return computer_move(game_state, depth, heuristic_value_1)
         
 def computer_move(game_state, depth, heuristic_function):

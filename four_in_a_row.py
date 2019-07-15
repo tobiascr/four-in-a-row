@@ -181,6 +181,7 @@ class Board(tk.Frame):
        for column in self.column_list:
             column.rebind_mouse()
 
+
 class Column(tk.Frame):
     def __init__(self, parent, column_number):
         """column_number is 0,1 to 6 and is used as an identifier."""
@@ -239,7 +240,8 @@ class Column(tk.Frame):
     def rebind_mouse(self):
         for cell in self.column:
             cell.rebind_mouse()
-                
+
+            
 class Cell(tk.Canvas):
 
     def __init__(self, parent, side_length):
@@ -327,7 +329,8 @@ class DialogBox(tk.Toplevel):
             
     def quit(self, event=None):
         self.destroy()
-                      
+
+             
 game_state = GameState()
 engine_interface = EngineInterface(2)                    
 main_window = MainWindow()
