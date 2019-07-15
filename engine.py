@@ -111,19 +111,14 @@ class GameState:
         self.player_in_turn = -self.player_in_turn
         self.number_of_moves -= 1
         
-    
-def win_last_move(game_state):
-    """True iff the last move made gives four in a row."""
-    col = game_state.move_sequence[-1]
-    player_in_last_move = -game_state.player_in_turn
-        
-    # Row (0-5) where the disk in the move is placed.
-    row = game_state.column_height[col] - 1
+def four_in_a_row(game_state, col, row):
+    """True iff there is a four in a row that includes the position (col, row)."""
+    player = game_state.columns[col][row]
 
     # Columns. It might be best to try this first, because it's
     # the fastest four in a row to test.
     if row > 2:
-        if (player_in_last_move ==
+        if (player ==
             game_state.columns[col][row-1] ==
             game_state.columns[col][row-2] ==
             game_state.columns[col][row-3]): return True
@@ -131,13 +126,13 @@ def win_last_move(game_state):
     # Rows
     in_row = 1
     while col-in_row >= 0:
-        if game_state.columns[col-in_row][row] == player_in_last_move:
+        if game_state.columns[col-in_row][row] == player:
             in_row += 1
         else:
             break
     n = 1
     while col+n <= 6:
-        if game_state.columns[col+n][row] == player_in_last_move:
+        if game_state.columns[col+n][row] == player:
             in_row += 1
             n += 1
         else:
@@ -149,13 +144,13 @@ def win_last_move(game_state):
     # Diagonals
     in_row = 1
     while col-in_row >= 0 and row-in_row >= 0:
-        if game_state.columns[col-in_row][row-in_row] == player_in_last_move:
+        if game_state.columns[col-in_row][row-in_row] == player:
             in_row += 1
         else:
             break
     n = 1
     while col+n <= 6 and row+n <= 5:
-        if game_state.columns[col+n][row+n] == player_in_last_move:
+        if game_state.columns[col+n][row+n] == player:
             in_row += 1
             n += 1
         else:
@@ -166,13 +161,13 @@ def win_last_move(game_state):
 
     in_row = 1
     while col-in_row >= 0 and row+in_row <= 5:
-        if game_state.columns[col-in_row][row+in_row] == player_in_last_move:
+        if game_state.columns[col-in_row][row+in_row] == player:
             in_row += 1
         else:
             break
     n = 1
     while col+n <= 6 and row-n >= 0:
-        if game_state.columns[col+n][row-n] == player_in_last_move:
+        if game_state.columns[col+n][row-n] == player:
             in_row += 1
             n += 1
         else:
@@ -182,6 +177,12 @@ def win_last_move(game_state):
         return True
 
     return False
+    
+def win_last_move(game_state):
+    """True iff the last move made gives four in a row."""
+    col = game_state.move_sequence[-1]
+    row = game_state.column_height[col] - 1
+    return four_in_a_row(game_state, col, row)
      
 def minimax_value(game_state, depth):
     """Maximizes if the player in the last move is 1 and minimizes if -1."""        
@@ -200,8 +201,7 @@ def minimax_value(game_state, depth):
     available_moves = game_state.available_moves()
 
     # Testing central moves first combined with pruning saves time.
-    test_order = [3,2,4,1,5,0,6]
-    for move in test_order:
+    for move in [3,2,4,1,5,0,6]:
         if move in available_moves:
             game_state.make_move(move)
             value = minimax_value(game_state, depth-1)
@@ -251,6 +251,22 @@ def heuristic_move(game_state, move_list, heuristic_function):
             best_moves.append(move_list[i])
     return random.choice(best_moves)
 
+def blocking_move(game_state):
+    """Return a move that blocks an immediate four in a row for the opponent iff
+    such move exist. Else return None."""
+    available_moves = game_state.available_moves()    
+    for col in [3,2,4,1,5,0,6]:
+        if col in available_moves:
+            row = game_state.column_height[col]
+            # Make a test move.
+            game_state.columns[col][row] = -game_state.player_in_turn
+            
+            if four_in_a_row(game_state, col, row):
+                return col
+            
+            # Undo the move.
+            game_state.columns[col][row] = 0
+            
 def computer_move_level_1(game_state):
     return computer_move(game_state, 0, heuristic_value_constant)
 
@@ -274,7 +290,7 @@ def computer_move_level_3(game_state):
 def computer_move(game_state, depth, heuristic_function):
     """Return a move computed by using the minimax algorithm
     and heuristic evaluations.
-    """   
+    """
     available_moves = game_state.available_moves()   
     minimax_values = [evaluate_move_minimax([game_state, depth, i]) for i in available_moves]
     
@@ -285,12 +301,19 @@ def computer_move(game_state, depth, heuristic_function):
     else:
         best_value = min(minimax_values)
     best_move = available_moves[minimax_values.index(best_value)]
-                    
+
     # If 0 is the best rating, then make a heuristic choice among the 0-rated moves.
     if best_value == 0:        
         neutral_moves = [available_moves[i] for i in range(len(available_moves))
                          if minimax_values[i] == 0]
         best_move = heuristic_move(game_state, neutral_moves, heuristic_function)                              
-                
+
+    # If there are only losing moves, chose one that is blocking a four in a row
+    # if there exist such a moves.
+    if ((game_state.player_in_turn == 1 and best_value < 0) or 
+       (game_state.player_in_turn == -1 and best_value > 0)):
+            move = blocking_move(game_state)
+            if move != None:
+                best_move = move                
     return best_move
         

@@ -64,7 +64,7 @@ class MainWindow(tk.Tk):
                 self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
                 self.new_game()
             else:
-                self.destroy()   
+                self.destroy()
                 
         self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window
         
