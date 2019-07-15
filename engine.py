@@ -252,9 +252,9 @@ def heuristic_move(game_state, move_list, heuristic_function):
     return random.choice(best_moves)
 
 def blocking_move(game_state):
-    """Return a move that blocks an immediate four in a row for the opponent iff
+    """Return a move that blocks an immediate four in a row for the opponent if
     such move exist. Else return None."""
-    available_moves = game_state.available_moves()    
+    available_moves = game_state.available_moves() 
     for col in [3,2,4,1,5,0,6]:
         if col in available_moves:
             row = game_state.column_height[col]
