@@ -7,7 +7,7 @@ class MainWindow(tk.Tk):
 
     def __init__(self):
         tk.Tk.__init__(self)
-        self.resizable(False, False)     
+        self.resizable(False, False)
         self.board = Board(self)
         self.board.pack()
         self.player_color = "yellow"
@@ -21,8 +21,8 @@ class MainWindow(tk.Tk):
         self.title("Four in a row: 0 - 0")
         self.animations = False
         
-    def new_game_dialog_box(self):    
-        self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window    
+    def new_game_dialog_box(self):
+        self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window
         dialog_box = DialogBox(main_window, "New game")
         if self.new_game_flag:
             self.new_game_flag = False
@@ -315,12 +315,12 @@ class DialogBox(tk.Toplevel):
         button_frame = tk.Frame(master=self, pady=10)
         button_frame.pack()
         tk.Button(button_frame, text="Play", font=("", 10), width=8,
-                  command=self.play).pack(side=tk.LEFT)
+                  command=self.play).pack(side=tk.LEFT)      
         tk.Button(button_frame, text="Quit", font=("", 10), width=8,
                   command=self.quit).pack()
         self.bind("<Return>", self.play)
         self.bind("<Escape>", self.quit)
-        parent.wait_window(window=self)
+        parent.wait_window(window=self) # Wait for the dialog box to be destroyed.
            
     def play(self, event=None):
         self.parent.new_game_flag = True
@@ -329,8 +329,8 @@ class DialogBox(tk.Toplevel):
             
     def quit(self, event=None):
         self.destroy()
-
-             
+              
+                
 game_state = GameState()
 engine_interface = EngineInterface(2)                    
 main_window = MainWindow()
