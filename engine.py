@@ -268,7 +268,11 @@ def blocking_move(game_state):
             game_state.columns[col][row] = 0
             
 def computer_move_level_1(game_state):
-    return computer_move(game_state, 0, heuristic_value_constant)
+    x = random.random()
+    if x < 0.3:        
+        return computer_move(game_state, 0, heuristic_value_constant)
+    else:
+        return computer_move(game_state, 1, heuristic_value_constant)
 
 def computer_move_level_2(game_state):
     return computer_move(game_state, 4, heuristic_value_constant)
