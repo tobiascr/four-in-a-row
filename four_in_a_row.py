@@ -32,7 +32,8 @@ class MainWindow(tk.Tk):
                
     def update_difficulty_level(self, *args):
         """Update the difficulty level in the engine and reset score if
-        the level is changed."""
+        the level is changed.
+        """
         current_level = engine_interface.difficulty_level
         if self.difficulty_level.get() == "Easy":
             engine_interface.difficulty_level = 1

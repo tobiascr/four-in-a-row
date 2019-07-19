@@ -50,10 +50,10 @@ def games(engine1, engine2, number_of_games):
                 engine1_wins += 1
             else:
                 draws += 1
-    return ("engine1 wins: " + str(engine1_wins) +
-            " engine2 wins: " + str(engine2_wins) + " draws: " + str(draws))
+    return ("engine1 wins: " + str(engine1_wins) + 
+            "\nengine2 wins: " + str(engine2_wins) + "\ndraws: " + str(draws))
 
-print(games(engine_interface_1, engine_interface_2, 20))
+print(games(engine_interface_1, engine_interface_2, 100))
 
             
             

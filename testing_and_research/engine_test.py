@@ -219,12 +219,68 @@ def heuristic_value_constant(game_state, move):
     return 0
 
 def heuristic_value_1(game_state, move):
-    """Give a heuristic evaluation in form of a non-negative number
+    """Give a heuristic evaluation in form of a number
     of how good it would be to make "move" to "game_state". The value is
     higher the better the move, regardless of the player to make it.
     """
-    return 10 - abs(3 - move)
+    return -abs(3 - move)
 
+def heuristic_value_2(game_state, move):
+    """Give a heuristic evaluation in form of a number
+    of how good it would be to make "move" to "game_state". The value is
+    higher the better the move, regardless of the player to make it.
+    
+    This function counts possible four in a rows further into the game.
+    """    
+    game_state.make_move(move)
+    value = -game_state.player_in_turn 
+    number_of_possible_four_in_a_rows = 0
+        
+    for col in range(7):
+        for row in range(game_state.column_height[col], 6):
+            # Make a test move
+            game_state.columns[col][row] = value
+            if four_in_a_row(game_state, col, row):
+                number_of_possible_four_in_a_rows += 1
+            # Undo the move
+            game_state.columns[col][row] = 0
+                
+    game_state.undo_last_move()
+
+    return number_of_possible_four_in_a_rows - 100*abs(3 - move)
+
+def heuristic_value_3(game_state, move):
+    """Give a heuristic evaluation in form of a number
+    of how good it would be to make "move" to "game_state". The value is
+    higher the better the move, regardless of the player to make it.
+    """
+    row = game_state.column_height[move]
+    return -abs(3 - move) - abs(2.5 - row)
+
+def heuristic_value_4(game_state, move):
+    """Give a heuristic evaluation in form of a number
+    of how good it would be to make "move" to "game_state". The value is
+    higher the better the move, regardless of the player to make it.
+    """
+    row = game_state.column_height[move]
+    return -2*abs(3 - move) - abs(2.5 - row)
+
+def heuristic_value_5(game_state, move):
+    """Give a heuristic evaluation in form of a number
+    of how good it would be to make "move" to "game_state". The value is
+    higher the better the move, regardless of the player to make it.
+    
+    The function gives the number of possible four in a rows on an empty board
+    that goes through the position where the move is made.
+    """    
+    positions = [[3, 4, 5, 7, 5, 4, 3],
+                 [4, 6, 7, 10, 7, 6, 4],
+                 [5, 8, 11, 13, 11, 8, 5],
+                 [5, 8, 11, 13, 11, 8, 5],
+                 [4, 6, 7, 10, 7, 6, 4],
+                 [3, 4, 5, 7, 5, 4, 3]] 
+    return positions[game_state.column_height[move]][move]
+    
 def evaluate_move_minimax(arg_list):
     """arg_list = [game_state, depth, move]"""    
     game_state = arg_list[0]
@@ -268,10 +324,10 @@ def blocking_move(game_state):
             game_state.columns[col][row] = 0
             
 def computer_move_level_1(game_state):
-    return computer_move(game_state, 1, heuristic_value_1)
+    return computer_move(game_state, 3, heuristic_value_constant)
 
 def computer_move_level_2(game_state):
-    return computer_move(game_state, 5, heuristic_value_constant)
+    return computer_move(game_state, 3, heuristic_value_3)
     
 def computer_move_level_3(game_state):
     available_moves = game_state.available_moves()
@@ -285,7 +341,7 @@ def computer_move_level_3(game_state):
     if 5 <= len(available_moves):
         depth = 4
         
-    return computer_move(game_state, depth, heuristic_value_constant)
+    return computer_move(game_state, depth, heuristic_value_2)
         
 def computer_move(game_state, depth, heuristic_function):
     """Return a move computed by using the minimax algorithm
