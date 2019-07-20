@@ -1,29 +1,31 @@
 
-from engine_copy import EngineInterface as EngineInterface1
-from engine_test import EngineInterface as EngineInterface2
-from engine_copy import GameState
+from engine1 import EngineInterface as EngineInterface1
+from engine1 import GameState as GameState1
+from engine2 import EngineInterface as EngineInterface2
+from engine2 import GameState as GameState2
 
-engine_interface_1 = EngineInterface2(1)
+engine_interface_1 = EngineInterface1(2)
 engine_interface_2 = EngineInterface2(2)
 
-def game(engine1, engine2):
+def game(engine1, game_state1, engine2, game_state2):
     """engine1 and engine2 are instances of EngineInterface.
     engine1 makes the first move.
     Return 0 if the result is a draw, 1 if engine1 win and 2 if engine2 win.
     """
-    game_state = GameState()
-    while True:        
-        column_number = engine1.engine_move(game_state)
-        game_state.make_move(column_number)                
-        if engine1.four_in_a_row(game_state):
+    while True:
+        column_number = engine1.engine_move(game_state1)
+        game_state1.make_move(column_number)
+        game_state2.make_move(column_number)    
+        if engine1.four_in_a_row(game_state1):
             return 1
-        if game_state.number_of_moves == 42:
-            return 0                                    
-        column_number = engine2.engine_move(game_state)
-        game_state.make_move(column_number)
-        if engine2.four_in_a_row(game_state):
+        if game_state1.number_of_moves == 42:
+            return 0
+        column_number = engine2.engine_move(game_state2)
+        game_state1.make_move(column_number)
+        game_state2.make_move(column_number)        
+        if engine2.four_in_a_row(game_state2):
             return 2
-        if game_state.number_of_moves == 42:
+        if game_state2.number_of_moves == 42:
             return 0
             
 def games(engine1, engine2, number_of_games):
@@ -35,7 +37,9 @@ def games(engine1, engine2, number_of_games):
     for n in range(number_of_games):
         print(n)
         if n % 2:
-            result = game(engine1, engine2)           
+            game_state1 = GameState1()
+            game_state2 = GameState2()        
+            result = game(engine1, game_state1, engine2, game_state2)           
             if result == 1:
                 engine1_wins += 1
             elif result == 2:
@@ -43,7 +47,9 @@ def games(engine1, engine2, number_of_games):
             else:
                 draws += 1
         else:
-            result = game(engine2, engine1)
+            game_state1 = GameState1()
+            game_state2 = GameState2()        
+            result = game(engine2, game_state2, engine1, game_state1)
             if result == 1:
                 engine2_wins += 1
             elif result == 2:

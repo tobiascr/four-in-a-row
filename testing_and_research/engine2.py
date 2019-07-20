@@ -91,6 +91,7 @@ class GameState:
         self.column_height = [0,0,0,0,0,0,0]
         self.move_sequence = []
         self.player_in_turn = 1
+        self.heuristic_value = 0
         
     def available_moves(self):
         return [move for move in range(7) if self.column_height[move] < 6]
@@ -193,8 +194,8 @@ def minimax_value(game_state, depth):
 
     # If not terminal node, but depth 0.
     if depth == 0:
-        return 0
-
+        return game_state.heuristic_value
+                                  
     # Else, return a value based on child node values.
     values = []
     available_moves = game_state.available_moves()
