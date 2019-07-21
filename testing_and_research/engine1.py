@@ -215,16 +215,24 @@ def minimax_value(game_state, depth):
     else:
         return max(values)       
     
-def heuristic_value_constant(game_state, move):
+def heuristic_function_constant(game_state, move):
     return 0
 
-def heuristic_value_1(game_state, move):
+def heuristic_function_1(game_state, move):
     """Give a heuristic evaluation in form of a non-negative number
     of how good it would be to make "move" to "game_state". The value is
     higher the better the move, regardless of the player to make it.
     """
     return 10 - abs(3 - move)
-
+    
+def heuristic_function_3(game_state, move):
+    """Give a heuristic evaluation in form of a number
+    of how good it would be to make "move" to "game_state". The value is
+    higher the better the move, regardless of the player to make it.
+    """
+    row = game_state.column_height[move]
+    return -abs(3 - move) - abs(2.5 - row)
+    
 def evaluate_move_minimax(arg_list):
     """arg_list = [game_state, depth, move]"""    
     game_state = arg_list[0]
@@ -270,12 +278,12 @@ def blocking_move(game_state):
 def computer_move_level_1(game_state):
     x = random.random()
     if x < 0.3:        
-        return computer_move(game_state, 0, heuristic_value_constant)
+        return computer_move(game_state, 0, heuristic_function_constant)
     else:
-        return computer_move(game_state, 1, heuristic_value_constant)
+        return computer_move(game_state, 1, heuristic_function_constant)
 
 def computer_move_level_2(game_state):
-    return computer_move(game_state, 4, heuristic_value_constant)
+    return computer_move(game_state, 3, heuristic_function_3)
     
 def computer_move_level_3(game_state):
     available_moves = game_state.available_moves()
@@ -289,7 +297,7 @@ def computer_move_level_3(game_state):
     if 5 <= len(available_moves):
         depth = 4
         
-    return computer_move(game_state, depth, heuristic_value_1)
+    return computer_move(game_state, depth, heuristic_function_1)
         
 def computer_move(game_state, depth, heuristic_function):
     """Return a move computed by using the minimax algorithm
