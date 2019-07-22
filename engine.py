@@ -207,6 +207,12 @@ def minimax_value(game_state, depth):
             values.append(value)
             game_state.undo_last_move()
             
+            # Pruning.
+            if game_state.player_in_turn == 1:
+                if value > 0: break
+            else:
+                if value < 0: break            
+            
     # If maximizing player made the last move.
     if game_state.player_in_turn == -1:
         return min(values)

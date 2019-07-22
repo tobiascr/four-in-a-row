@@ -206,7 +206,13 @@ def minimax_value(game_state, depth):
             value = minimax_value(game_state, depth-1)
             values.append(value)
             game_state.undo_last_move()
-            
+
+            # Pruning.
+            if game_state.player_in_turn == 1:
+                if value > 0: break
+            else:
+                if value < 0: break
+                                            
     # If maximizing player made the last move.
     if game_state.player_in_turn == -1:
         return min(values)
@@ -283,7 +289,7 @@ def computer_move_level_1(game_state):
         return computer_move(game_state, 1, heuristic_function_constant)
 
 def computer_move_level_2(game_state):
-    return computer_move(game_state, 3, heuristic_function_3)
+    return computer_move(game_state, 5, heuristic_function_3)
     
 def computer_move_level_3(game_state):
     available_moves = game_state.available_moves()
