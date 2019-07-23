@@ -86,4 +86,4 @@ def games(engine1, engine2, number_of_games, print_move_times=False):
     return (engine1.name + " wins: " + str(engine1_wins) + 
             "\n" + engine2.name + " wins: " + str(engine2_wins) + "\ndraws: " + str(draws))
 
-print(games(engine_interface_1, engine_interface_2, 2, True))
+print(games(engine_interface_1, engine_interface_2, 10, True))

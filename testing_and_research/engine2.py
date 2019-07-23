@@ -101,15 +101,14 @@ class GameState:
         self.column_height[column] += 1
         self.player_in_turn = -self.player_in_turn
         self.number_of_moves += 1
-                       
+        
     def undo_last_move(self):
         last_move = self.move_sequence[-1]
         self.column_height[last_move] -= 1
         self.columns[last_move][self.column_height[last_move]] = 0
-        del self.move_sequence[-1]               
+        del self.move_sequence[-1]
         self.player_in_turn = -self.player_in_turn
-        self.number_of_moves -= 1            
-                
+        self.number_of_moves -= 1
         
 def four_in_a_row(game_state, col, row):
     """True iff there is a four in a row that includes the position (col, row)."""
@@ -184,8 +183,10 @@ def win_last_move(game_state):
     row = game_state.column_height[col] - 1
     return four_in_a_row(game_state, col, row)
      
-def minimax_value(game_state, depth):
-    """Maximizes if the player in the last move is 1 and minimizes if -1."""        
+def minimax_value(game_state, depth, pruning):
+    """Maximizes if the player in the last move is 1 and minimizes if -1.
+    pruning is True or False.
+    """        
     # If terminal node (win or board full).
     if win_last_move(game_state):
         return -(1000 + depth) * game_state.player_in_turn
@@ -193,26 +194,26 @@ def minimax_value(game_state, depth):
         return 0
 
     # If not terminal node, but depth 0.
-    if depth == 0: 
+    if depth == 0:
         return 0
-                                  
+
     # Else, return a value based on child node values.
     values = []
     available_moves = game_state.available_moves()
 
-    # Testing central moves first combined with pruning saves time.    
-    for move in [3,2,4,1,5,0,6]:        
+    # Testing central moves first combined with pruning saves time.
+    for move in [3,2,4,1,5,0,6]:
         if move in available_moves:
             game_state.make_move(move)
-            value = minimax_value(game_state, depth-1)
-            values.append(value)                       
+            value = minimax_value(game_state, depth-1, pruning)
+            values.append(value)
             game_state.undo_last_move()
-
-            # Pruning.
-            if game_state.player_in_turn == 1:
-                if value > 0: break
-            else:
-                if value < 0: break
+            
+            if pruning:
+                if game_state.player_in_turn == 1:
+                    if value > 0: break
+                else:
+                    if value < 0: break            
             
     # If maximizing player made the last move.
     if game_state.player_in_turn == -1:
@@ -229,15 +230,18 @@ def heuristic_function_1(game_state, move):
     """Give a heuristic evaluation in form of a number
     of how good it would be to make "move" to "game_state". The value is
     higher the better the move, regardless of the player to make it.
+    
+    This function give higher values to more central columns.
     """
     return -abs(3 - move)
-
+    
 def heuristic_function_2(game_state, move):
     """Give a heuristic evaluation in form of a number
     of how good it would be to make "move" to "game_state". The value is
     higher the better the move, regardless of the player to make it.
     
     This function counts possible four in a rows further into the game.
+    Test shows that this function is weak compared to favouring central moves.
     """    
     game_state.make_move(move)
     value = -game_state.player_in_turn 
@@ -254,50 +258,23 @@ def heuristic_function_2(game_state, move):
                 
     game_state.undo_last_move()
 
-    return number_of_possible_four_in_a_rows - 100*abs(3 - move)
+    return number_of_possible_four_in_a_rows
 
 def heuristic_function_3(game_state, move):
     """Give a heuristic evaluation in form of a number
     of how good it would be to make "move" to "game_state". The value is
     higher the better the move, regardless of the player to make it.
+    
+    This function give higher values to more central columns and rows.
+    Test shows that this function is stronger than the above heuristic functions.
     """
     row = game_state.column_height[move]
     return -abs(3 - move) - abs(2.5 - row)
 
-def heuristic_function_4(game_state, move):
-    """Give a heuristic evaluation in form of a number
-    of how good it would be to make "move" to "game_state". The value is
-    higher the better the move, regardless of the player to make it.
-    """
-    row = game_state.column_height[move]
-    return -2*abs(3 - move) - abs(2.5 - row)
-
-def heuristic_function_5(game_state, move):
-    """Give a heuristic evaluation in form of a number
-    of how good it would be to make "move" to "game_state". The value is
-    higher the better the move, regardless of the player to make it.
-    
-    The function gives the number of possible four in a rows on an empty board
-    that goes through the position where the move is made.
-    """    
-    positions = [[3, 4, 5, 7, 5, 4, 3],
-                 [4, 6, 7, 10, 7, 6, 4],
-                 [5, 8, 11, 13, 11, 8, 5],
-                 [5, 8, 11, 13, 11, 8, 5],
-                 [4, 6, 7, 10, 7, 6, 4],
-                 [3, 4, 5, 7, 5, 4, 3]] 
-    return positions[game_state.column_height[move]][move]
-    
-def evaluate_move_minimax(arg_list):
-    """arg_list = [game_state, depth, move]"""    
-    game_state = arg_list[0]
-    depth = arg_list[1]
-    move = arg_list[2]
-        
+def evaluate_move_minimax(game_state, depth, move, pruning):
     game_state.make_move(move)
-    value = minimax_value(game_state, depth)
-    game_state.undo_last_move()
-            
+    value = minimax_value(game_state, depth, pruning)
+    game_state.undo_last_move()            
     return value
 
 def heuristic_move(game_state, move_list, heuristic_function):
@@ -331,10 +308,14 @@ def blocking_move(game_state):
             game_state.columns[col][row] = 0
             
 def computer_move_level_1(game_state):
-    return computer_move(game_state, 3, heuristic_function_constant)
+    x = random.random()
+    if x < 0.3:        
+        return computer_move(game_state, 0, heuristic_function_constant)
+    else:
+        return computer_move(game_state, 1, heuristic_function_constant)
 
 def computer_move_level_2(game_state):
-    return computer_move(game_state, 5, heuristic_function_3)
+    return computer_move(game_state, 4, heuristic_function_constant)
     
 def computer_move_level_3(game_state):
     available_moves = game_state.available_moves()
@@ -348,14 +329,16 @@ def computer_move_level_3(game_state):
     if 5 <= len(available_moves):
         depth = 4
         
-    return computer_move(game_state, depth, heuristic_function_2)
+    return computer_move(game_state, depth, heuristic_function_3)
         
 def computer_move(game_state, depth, heuristic_function):
     """Return a move computed by using the minimax algorithm
     and heuristic evaluations.
     """
-    available_moves = game_state.available_moves()   
-    minimax_values = [evaluate_move_minimax([game_state, depth, i]) for i in available_moves]
+    available_moves = game_state.available_moves()
+    pruning = True  
+    minimax_values = [evaluate_move_minimax(game_state, depth, i, pruning)
+                      for i in available_moves]
     
     # If maximizing player.
     if game_state.player_in_turn == 1:
@@ -366,10 +349,10 @@ def computer_move(game_state, depth, heuristic_function):
     best_move = available_moves[minimax_values.index(best_value)]
 
     # If 0 is the best rating, then make a heuristic choice among the 0-rated moves.
-    if best_value == 0:
+    if best_value == 0:        
         neutral_moves = [available_moves[i] for i in range(len(available_moves))
                          if minimax_values[i] == 0]
-        best_move = heuristic_move(game_state, neutral_moves, heuristic_function)                          
+        best_move = heuristic_move(game_state, neutral_moves, heuristic_function)                       
 
     # If there are only losing moves, chose one that is blocking a four in a row
     # if there exist such moves.
@@ -377,6 +360,6 @@ def computer_move(game_state, depth, heuristic_function):
        (game_state.player_in_turn == -1 and best_value > 0)):
             move = blocking_move(game_state)
             if move != None:
-                best_move = move            
+                best_move = move
     return best_move
         
