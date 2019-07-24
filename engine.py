@@ -362,9 +362,9 @@ def computer_move(game_state, depth, heuristic_function):
             else:
                 neutral_moves.append(move)
 
-    print("winning_moves:", winning_moves)
-    print("neutral_moves;", neutral_moves)
-    print("losing_moves", losing_moves)
+    #print("winning_moves:", winning_moves)
+    #print("neutral_moves;", neutral_moves)
+    #print("losing_moves", losing_moves)
 
     # If there is exactly one winning move, return that move.
     if len(winning_moves) == 1:
