@@ -185,7 +185,9 @@ def win_last_move(game_state):
      
 def minimax_value(game_state, depth, pruning):
     """Maximizes if the player in the last move is 1 and minimizes if -1.
-    pruning is True or False.
+    If pruning is True, the algoritm only cares about winning or losing. If
+    pruning is False, the number of moves to a win or loss is also taken
+    into account.
     """        
     # If terminal node (win or board full).
     if win_last_move(game_state):
@@ -335,31 +337,77 @@ def computer_move(game_state, depth, heuristic_function):
     """Return a move computed by using the minimax algorithm
     and heuristic evaluations.
     """
+    maximizing = game_state.player_in_turn == 1
     available_moves = game_state.available_moves()
-    pruning = True    
-    minimax_values = [evaluate_move_minimax(game_state, depth, i, pruning)
-                      for i in available_moves]
     
-    # If maximizing player.
-    if game_state.player_in_turn == 1:
-        best_value = max(minimax_values)
-    # If minimizing player.
-    else:
-        best_value = min(minimax_values)
-    best_move = available_moves[minimax_values.index(best_value)]
+    # Look for moves that are winning, losing or neutral.
+    winning_moves = []
+    neutral_moves = []
+    losing_moves = []
+    pruning = True
+    for move in available_moves:
+        value = evaluate_move_minimax(game_state, depth, move, pruning)
+        if maximizing:
+            if value > 0:
+                winning_moves.append(move)
+            elif value < 0:
+                losing_moves.append(move)
+            else:
+                neutral_moves.append(move)
+        else:
+            if value < 0:
+                winning_moves.append(move)
+            elif value > 0:
+                losing_moves.append(move)
+            else:
+                neutral_moves.append(move)
 
-    # If 0 is the best rating, then make a heuristic choice among the 0-rated moves.
-    if best_value == 0:        
-        neutral_moves = [available_moves[i] for i in range(len(available_moves))
-                         if minimax_values[i] == 0]
-        best_move = heuristic_move(game_state, neutral_moves, heuristic_function)                       
+    print("winning_moves:", winning_moves)
+    print("neutral_moves;", neutral_moves)
+    print("losing_moves", losing_moves)
+
+    # If there is exactly one winning move, return that move.
+    if len(winning_moves) == 1:
+        return winning_moves[0]
+
+    # If there are several winning moves, chose one that gives a fast win.
+    if len(winning_moves) > 1:
+        pruning = False
+        minimax_values = [evaluate_move_minimax(game_state, 4, move, pruning)
+                          for move in winning_moves]
+        if maximizing:
+            best_value = max(minimax_values)
+        else:
+            best_value = min(minimax_values)
+                    
+        # I there are several equally good moves, use heuristics to chose one.
+        best_moves = [winning_moves[i] for i in range(len(winning_moves))
+                      if minimax_values[i] == best_value]
+        return heuristic_move(game_state, best_moves, heuristic_function)
+        
+    # If there are 0 rated moves, then chose one by using a heuristic method.
+    if neutral_moves:
+        return heuristic_move(game_state, neutral_moves, heuristic_function)                
 
     # If there are only losing moves, chose one that is blocking a four in a row
     # if there exist such moves.
-    if ((game_state.player_in_turn == 1 and best_value < 0) or
-       (game_state.player_in_turn == -1 and best_value > 0)):
-            move = blocking_move(game_state)
-            if move != None:
-                best_move = move
-    return best_move
-        
+    move = blocking_move(game_state)
+    if move != None:
+       return move
+    
+    # If there are only losing moves and no blocking moves, chose one that gives
+    # a slow loss.
+    pruning = False
+    minimax_values = [evaluate_move_minimax(game_state, 4, move, pruning)
+                      for move in losing_moves]
+    if maximizing:
+        best_value = max(minimax_values)
+    else:
+        best_value = min(minimax_values)
+                          
+    # I there are several equally good moves, use heuristics to chose one.
+    best_moves = [losing_moves[i] for i in range(len(losing_moves))
+                  if minimax_values[i] == best_value]
+    return heuristic_move(game_state, best_moves, heuristic_function)
+                          
+
