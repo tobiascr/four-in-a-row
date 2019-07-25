@@ -74,6 +74,7 @@ class MainWindow(tk.Tk):
         if column_height < 6:
             game_state.make_move(column_number)
             self.board.add_disk_to_top_of_column(column_number, self.player_color, self.animations)
+            self.update_idletasks()
         else:
             self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
             return

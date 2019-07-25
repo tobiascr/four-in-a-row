@@ -321,15 +321,18 @@ def computer_move_level_2(game_state):
     
 def computer_move_level_3(game_state):
     available_moves = game_state.available_moves()
-    
+               
     # Depth for the minimax algorithm is chosen based
     # on the number of filled columns.
-    if len(available_moves) < 3:
+    columns = len(available_moves)            
+    if columns < 3:
         depth = 12
-    if 3 <= len (available_moves) < 5:
+    if 3 <= columns < 5:
         depth = 6
-    if 5 <= len(available_moves):
+    else:
         depth = 4
+        if game_state.number_of_moves == 0:
+            return 3
         
     return computer_move(game_state, depth, heuristic_function_3)
         
