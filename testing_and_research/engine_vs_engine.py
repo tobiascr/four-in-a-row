@@ -5,9 +5,9 @@ from engine2 import EngineInterface as EngineInterface2
 from engine2 import GameState as GameState2
 import time
 
-engine_interface_1 = EngineInterface1(3)
+engine_interface_1 = EngineInterface1(2)
 engine_interface_1.name = "engine1"
-engine_interface_2 = EngineInterface2(3)
+engine_interface_2 = EngineInterface2(2)
 engine_interface_2.name = "engine2"
 
 def game(engine1, game_state1, engine2, game_state2, print_move_times=False):
@@ -96,4 +96,4 @@ def games(engine1, engine2, number_of_games, print_move_times=False):
     print(engine1.name + " total time:", engine1_time, "s")
     print(engine2.name + " total time:", engine2_time, "s")
     
-games(engine_interface_1, engine_interface_2, 100, True)
+games(engine_interface_1, engine_interface_2, 50, True)

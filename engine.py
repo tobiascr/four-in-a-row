@@ -317,7 +317,11 @@ def computer_move_level_1(game_state):
         return computer_move(game_state, 1, heuristic_function_constant)
 
 def computer_move_level_2(game_state):
-    return computer_move(game_state, 4, heuristic_function_constant)
+    x = random.random()
+    if x < 0.7:        
+        return computer_move(game_state, 3, heuristic_function_constant)
+    else:
+        return computer_move(game_state, 3, heuristic_function_3)
     
 def computer_move_level_3(game_state):
     available_moves = game_state.available_moves()
