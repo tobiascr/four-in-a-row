@@ -268,10 +268,27 @@ def heuristic_function_3(game_state, move):
     higher the better the move, regardless of the player to make it.
     
     This function give higher values to more central columns and rows.
-    Test shows that this function is stronger than the above heuristic functions.
+    Tests shows that this function is stronger than the above heuristic functions.
     """
     row = game_state.column_height[move]
     return -abs(3 - move) - abs(2.5 - row)
+
+def heuristic_function_4(game_state, move):
+    """Give a heuristic evaluation in form of a number
+    of how good it would be to make "move" to "game_state". The value is
+    higher the better the move, regardless of the player to make it.
+    
+    This function give higher values to more central positions.
+    Test shows that this function is stronger than the above heuristic functions.
+    """
+    row = game_state.column_height[move]
+    values = [[0, 0, 0, 0, 0, 0, 0],
+              [0, 0, 1, 1, 1, 0, 0],
+              [0, 1, 1, 1, 1, 1, 0],
+              [0, 1, 1, 1, 1, 1, 0],
+              [0, 0, 1, 1, 1, 0, 0],
+              [0, 0, 0, 0, 0, 0, 0]]
+    return values[row][move]
 
 def evaluate_move_minimax(game_state, depth, move, pruning):
     game_state.make_move(move)
@@ -312,20 +329,20 @@ def blocking_moves(game_state):
 def computer_move_level_1(game_state):
     x = random.random()
     if x < 0.3:        
-        return computer_move(game_state, 0, heuristic_function_constant)
-    else:
         return computer_move(game_state, 1, heuristic_function_constant)
+    else:
+        return computer_move(game_state, 2, heuristic_function_constant)
 
 def computer_move_level_2(game_state):
     x = random.random()
-    if x < 0.7:        
+    if x < 0.3:
         return computer_move(game_state, 3, heuristic_function_constant)
     else:
-        return computer_move(game_state, 3, heuristic_function_3)
+        return computer_move(game_state, 3, heuristic_function_4)
         
 def computer_move_level_3(game_state):
     available_moves = game_state.available_moves()
-               
+
     # Depth for the minimax algorithm is chosen based
     # on the number of filled columns.
     columns = len(available_moves)            
@@ -344,11 +361,11 @@ def computer_move(game_state, depth, heuristic_function):
     """Return a move computed by using the minimax algorithm
     and heuristic evaluations.
     """
-    def best_moves(move_list, value_list):        
+    def best_moves(move_list, value_list):
         if maximizing:
             best_value = max(value_list)
         else:
-            best_value = min(value_list)                    
+            best_value = min(value_list)
         return [move_list[i] for i in range(len(move_list))
                 if value_list[i] == best_value]
          
