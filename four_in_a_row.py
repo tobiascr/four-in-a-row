@@ -20,7 +20,7 @@ class MainWindow(tk.Tk):
         self.score = [0, 0]
         self.title("Four in a row: 0 - 0")
         self.animations = False
-        
+
     def new_game_dialog_box(self):
         self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window
         dialog_box = DialogBox(main_window, "New game")
@@ -29,7 +29,7 @@ class MainWindow(tk.Tk):
             self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
         else:
             self.destroy()
-               
+
     def update_difficulty_level(self, *args):
         """Update the difficulty level in the engine and reset score if
         the level is changed.
@@ -44,13 +44,13 @@ class MainWindow(tk.Tk):
         if engine_interface.difficulty_level != current_level:
             self.score = [0, 0]
             self.title_update()
-        
+
     def title_update(self):
         self.title("Four in a row: " + str(self.score[0]) + " - " + str(self.score[1]))
-        
+
     def update_and_pause(self, time_in_ms):
         self.board.unbind_mouse()
-        self.update_idletasks()                    
+        self.update_idletasks()
         self.after(time_in_ms)
         self.update() # Handle possible events.
         self.board.rebind_mouse()
@@ -58,7 +58,7 @@ class MainWindow(tk.Tk):
     def mouse_click(self, column_number):
         """This function is called if the column with column_number have been
         clicked on.
-        """        
+        """
         def dialog(text):
             dialog_box = DialogBox(main_window, text)        
             if self.new_game_flag:
@@ -66,9 +66,9 @@ class MainWindow(tk.Tk):
                 self.new_game()
             else:
                 self.destroy()
-                
+
         self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window
-        
+
         # Player make a move, if there is empty places left in the column.
         column_height = game_state.column_height[column_number]
         if column_height < 6:
@@ -78,7 +78,7 @@ class MainWindow(tk.Tk):
         else:
             self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
             return
-        
+
         # If player win.
         if engine_interface.four_in_a_row(game_state):
             self.score[0] += 1
@@ -87,7 +87,7 @@ class MainWindow(tk.Tk):
             self.update_and_pause(1000)
             dialog("You win! Congratulations!")
             return
-                
+
         # If draw.
         if game_state.number_of_moves == 42:
             self.update_and_pause(600)
@@ -115,11 +115,11 @@ class MainWindow(tk.Tk):
         # If draw.
         if game_state.number_of_moves == 42:   
             self.update_and_pause(600)
-            dialog("Draw")            
+            dialog("Draw")
             return
 
         self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
-    
+
     def highlight_four_in_a_row(self, color):     
         positions = engine_interface.four_in_a_row_positions(game_state)        
         self.update_and_pause(500)
@@ -128,7 +128,7 @@ class MainWindow(tk.Tk):
         self.update_and_pause(500)
         for (column, row) in positions:
             self.board.add_disk(column, row, color)
-        
+
     def new_game(self):
         self.new_game_flag = False
         self.player_make_first_move = not self.player_make_first_move
@@ -146,8 +146,8 @@ class MainWindow(tk.Tk):
 
     def close_window(self):
         self.destroy()
-        
-    
+
+
 class Board(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
@@ -178,7 +178,7 @@ class Board(tk.Frame):
     def unbind_mouse(self):
         for column in self.column_list:
             column.unbind_mouse()
-        
+
     def rebind_mouse(self):
        for column in self.column_list:
             column.rebind_mouse()
@@ -243,7 +243,7 @@ class Column(tk.Frame):
         for cell in self.column:
             cell.rebind_mouse()
 
-            
+
 class Cell(tk.Canvas):
 
     def __init__(self, parent, side_length):
@@ -260,20 +260,20 @@ class Cell(tk.Canvas):
         self.disk = self.create_oval(d, d, d + 2 * radius + 1, d + 2 * radius + 1,
                                      width=2, outline="#0000AA")                                                                              
         self.bind("<Button-1>", parent.mouse_click)
-    
+
     def add_disk(self, color):
         self.itemconfig(self.disk, fill=color)
 
     def remove_disk(self):   
         self.itemconfig(self.disk, fill=self.background_color)
-        
+
     def unbind_mouse(self):
         self.unbind("<Button-1>")
-        
+
     def rebind_mouse(self):
         self.bind("<Button-1>", self.parent.mouse_click)
-        
-        
+
+
 class DialogBox(tk.Toplevel):
 
     def __init__(self, parent, text):
@@ -281,27 +281,27 @@ class DialogBox(tk.Toplevel):
         tk.Toplevel.__init__(self, parent)
         self.parent = parent
         self.transient(parent)
-        self.wait_visibility() # Window needs to be visible for the grab.
-        self.grab_set() # Routes all events for this application to this widget.
-        self.focus_set()
         self.title("Four in a row")
         box_width = 300
         box_height = 120
 
         parent_width = parent.winfo_width()
         parent_height = parent.winfo_height()
-        
+
         if box_width >= parent_width:
             x_offset = parent.winfo_rootx()
         else:
             x_offset = parent.winfo_rootx() + (parent_width - box_width) // 2
-        
+
         y_offset = parent.winfo_rooty() + (parent_height - box_height - 40) // 2
         if y_offset < parent.winfo_rooty():
             y_offset = parent.winfo_rooty()
-        
+
         self.geometry("%dx%d+%d+%d" % (box_width, box_height, x_offset, y_offset))
-    
+        self.wait_visibility() # Window needs to be visible for the grab.
+        self.grab_set() # Routes all events for this application to this widget.
+        self.focus_set()
+
         text = tk.Label(self, text=text, font=("", 11, "bold"), borderwidth=10)
         text.pack()
 
@@ -323,18 +323,18 @@ class DialogBox(tk.Toplevel):
         self.bind("<Return>", self.play)
         self.bind("<Escape>", self.quit)
         parent.wait_window(window=self) # Wait for the dialog box to be destroyed.
-           
+
     def play(self, event=None):
         self.parent.new_game_flag = True
         self.parent.update_difficulty_level()
         self.destroy()
-            
+
     def quit(self, event=None):
         self.destroy()
-              
-                
+
+
 game_state = GameState()
-engine_interface = EngineInterface(2)                    
+engine_interface = EngineInterface(2)
 main_window = MainWindow()
 main_window.update()
 main_window.new_game_dialog_box()

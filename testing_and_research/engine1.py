@@ -279,7 +279,6 @@ def heuristic_function_4(game_state, move):
     higher the better the move, regardless of the player to make it.
     
     This function give higher values to more central positions.
-    Test shows that this function is stronger than the above heuristic functions.
     """
     row = game_state.column_height[move]
     values = [[0, 0, 0, 0, 0, 0, 0],
