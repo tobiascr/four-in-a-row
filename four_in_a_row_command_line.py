@@ -31,16 +31,16 @@ if __name__ == "__main__":
         answer = input("Difficulty level (1-3): ")
         if answer == "1" or answer == "2" or answer == "3":
             difficulty = int(answer)
-            engine_interface = EngineInterface(difficulty)    
+            engine_interface = EngineInterface(difficulty)
             print()
             break
         elif answer == "q":
-            exit_program = True           
+            exit_program = True
             break
 
     while True:
         if new_game:
-            game_state = GameState()           
+            game_state = GameState()
             player_win = False
             computer_win = False
             computer_in_turn = computer_begin
@@ -73,13 +73,13 @@ if __name__ == "__main__":
                         game_state.make_move(move)
                         if engine_interface.four_in_a_row(game_state):
                             player_win = True
-                        print()                       
+                        print()
                         break
  
         if move_str == "q":
             break
-        
-        if computer_in_turn or player_win or game_state.number_of_moves == 42:           
+
+        if computer_in_turn or player_win or game_state.number_of_moves == 42:
             draw_board(game_state, -computer_number)
             print()
 
@@ -91,13 +91,13 @@ if __name__ == "__main__":
             print("Computer wins. Congratulations!")
         elif game_state.number_of_moves == 42:
             print("Draw")
-       
+
         if player_win or computer_win or game_state.number_of_moves == 42:
             choise = ""
             while choise != "y" and choise != "n":
                 print()
-                choise = input("Play again (y/n)? ")                
-            if choise == "y":            
+                choise = input("Play again (y/n)? ")
+            if choise == "y":
                 new_game = True
                 print()
             if choise == "n": break

@@ -13,8 +13,8 @@ class MainWindow(tk.Tk):
         self.player_color = "yellow"
         self.engine_color = "red"
         self.new_game_flag = False
-        self.difficulty_level = tk.StringVar()        
-        self.difficulty_level.set("Medium")    
+        self.difficulty_level = tk.StringVar()
+        self.difficulty_level.set("Medium")
         self.player_make_first_move = True
         self.protocol("WM_DELETE_WINDOW", self.close_window)
         self.score = [0, 0]
@@ -60,7 +60,7 @@ class MainWindow(tk.Tk):
         clicked on.
         """
         def dialog(text):
-            dialog_box = DialogBox(main_window, text)        
+            dialog_box = DialogBox(main_window, text)
             if self.new_game_flag:
                 self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
                 self.new_game()
@@ -120,8 +120,8 @@ class MainWindow(tk.Tk):
 
         self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
 
-    def highlight_four_in_a_row(self, color):     
-        positions = engine_interface.four_in_a_row_positions(game_state)        
+    def highlight_four_in_a_row(self, color):
+        positions = engine_interface.four_in_a_row_positions(game_state)
         self.update_and_pause(500)
         for (column, row) in positions:
             self.board.remove_disk(column, row)
@@ -138,7 +138,7 @@ class MainWindow(tk.Tk):
         if not self.player_make_first_move:
             column_number = engine_interface.engine_move(game_state)
             game_state.make_move(column_number)
-            self.update_and_pause(300)                     
+            self.update_and_pause(300)
             self.board.add_disk_to_top_of_column(column_number, self.engine_color, self.animations)
 
     def dont_close_window(self):
