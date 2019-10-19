@@ -409,7 +409,7 @@ def computer_move(game_state, depth, heuristic_function):
         return heuristic_move(game_state, neutral_moves, heuristic_function)
 
     # If there are only losing moves, chose one that is blocking a four in a row
-    # if there exist such moves.           
+    # if there exist such moves.
     move_list = blocking_moves(game_state)
     if move_list:
         return heuristic_move(game_state, move_list, heuristic_function)
