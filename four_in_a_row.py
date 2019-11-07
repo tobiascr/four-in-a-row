@@ -253,18 +253,18 @@ class Cell(tk.Canvas):
         self.parent = parent
         self.background_color = "#1439f9"
         tk.Canvas.__init__(self, parent, width=side_length, height=side_length,
-                           bg=self.background_color, highlightthickness=0)                         
+                           bg=self.background_color, highlightthickness=0)
         # An odd diameter can give a better looking circle.
         radius = (9 * side_length) // 20
         d = (side_length - (2 * radius + 1)) // 2
         self.disk = self.create_oval(d, d, d + 2 * radius + 1, d + 2 * radius + 1,
-                                     width=2, outline="#0000AA")                                                                              
+                                     width=2, outline="#0000AA")
         self.bind("<Button-1>", parent.mouse_click)
 
     def add_disk(self, color):
         self.itemconfig(self.disk, fill=color)
 
-    def remove_disk(self):   
+    def remove_disk(self):
         self.itemconfig(self.disk, fill=self.background_color)
 
     def unbind_mouse(self):
