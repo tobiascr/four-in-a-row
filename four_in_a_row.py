@@ -159,7 +159,7 @@ class Board(tk.Frame):
             self.column_list.append(column)
 
     def mouse_click(self, column_number):
-        self.parent.mouse_click(column_number)      
+        self.parent.mouse_click(column_number)
 
     def add_disk_to_top_of_column(self, column_number, color, animations):
         """column_number is 0,1 to 6. animations is True or False."""
@@ -317,7 +317,7 @@ class DialogBox(tk.Toplevel):
         button_frame = tk.Frame(master=self, pady=10)
         button_frame.pack()
         tk.Button(button_frame, text="Play", font=("", 10), width=8,
-                  command=self.play).pack(side=tk.LEFT)      
+                  command=self.play).pack(side=tk.LEFT)
         tk.Button(button_frame, text="Quit", font=("", 10), width=8,
                   command=self.quit).pack()
         self.bind("<Return>", self.play)
