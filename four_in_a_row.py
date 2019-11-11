@@ -113,7 +113,7 @@ class MainWindow(tk.Tk):
             return
 
         # If draw.
-        if game_state.number_of_moves == 42:   
+        if game_state.number_of_moves == 42:
             self.update_and_pause(600)
             dialog("Draw")
             return
@@ -202,7 +202,7 @@ class Column(tk.Frame):
 
     def add_disk_to_top_of_column(self, color, animations):
         """animations is True or False."""
-        if animations:            
+        if animations:
             time_in_each_row = [0.41421356237309515, 0.31783724519578205, 0.2679491924311228,
                                 0.2360679774997898, 0.21342176528338808]
             total_time = 0
@@ -231,7 +231,7 @@ class Column(tk.Frame):
         self.column[row].remove_disk()
 
     def remove_all_disks(self):
-        self.disks_in_column = 0   
+        self.disks_in_column = 0
         for cell in self.column:
             cell.remove_disk()
 
