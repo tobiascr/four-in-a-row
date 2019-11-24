@@ -21,7 +21,7 @@ class EngineInterface():
 
         def disks_are_of_same_type(col_row_pair_set):
             type_ = None
-            all_equal = True      
+            all_equal = True
             for (column, row) in col_row_pair_set:
                 if type_ == None:
                     type_ = disk_type(column, row)
