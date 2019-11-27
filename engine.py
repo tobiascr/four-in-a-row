@@ -183,12 +183,8 @@ def win_last_move(game_state):
     row = game_state.column_height[col] - 1
     return four_in_a_row(game_state, col, row)
 
-def minimax_value(game_state, depth, pruning):
-    """Maximizes if the player in the last move is 1 and minimizes if -1.
-    If pruning is True, the algoritm only cares about winning or losing. If
-    pruning is False, the number of moves to a win or loss is also taken
-    into account.
-    """
+def minimax(game_state, depth, alpha=-10000, beta=10000):
+    """Maximizes if the player in the last move is 1 and minimizes if -1."""
     # If terminal node (win or board full).
     if win_last_move(game_state):
         return -(1000 + depth) * game_state.player_in_turn
@@ -203,19 +199,29 @@ def minimax_value(game_state, depth, pruning):
     values = []
     available_moves = game_state.available_moves()
 
-    # Testing central moves first combined with pruning saves time.
-    for move in [3,2,4,1,5,0,6]:
-        if move in available_moves:
-            game_state.make_move(move)
-            value = minimax_value(game_state, depth-1, pruning)
-            values.append(value)
-            game_state.undo_last_move()
 
-            if pruning:
-                if game_state.player_in_turn == 1:
-                    if value > 0: break
-                else:
-                    if value < 0: break
+    if game_state.player_in_turn == 1:
+        # Testing central moves first combined with pruning saves time.
+        for move in [3,2,4,1,5,0,6]:
+            if move in available_moves:
+                game_state.make_move(move)
+                new_value = minimax(game_state, depth-1, alpha, beta)
+                values.append(new_value)
+                game_state.undo_last_move()
+                alpha = max(alpha, new_value)
+                if beta <= alpha:
+                    break
+    else:
+        # Testing central moves first combined with pruning saves time.
+        for move in [3,2,4,1,5,0,6]:
+            if move in available_moves:
+                game_state.make_move(move)
+                new_value = minimax(game_state, depth-1, alpha, beta)
+                values.append(new_value)
+                game_state.undo_last_move()
+                beta = min(beta, new_value)
+                if beta <= alpha:
+                    break
 
     # If maximizing player made the last move.
     if game_state.player_in_turn == -1:
@@ -291,7 +297,7 @@ def heuristic_function_4(game_state, move):
 
 def evaluate_move_minimax(game_state, depth, move, pruning):
     game_state.make_move(move)
-    value = minimax_value(game_state, depth, pruning)
+    value = minimax(game_state, depth)
     game_state.undo_last_move()
     return value
 
@@ -346,11 +352,11 @@ def computer_move_level_3(game_state):
     # on the number of filled columns.
     columns = len(available_moves)
     if columns < 3:
-        depth = 12
+        depth = 20
     if 3 <= columns < 5:
-        depth = 6
+        depth = 10
     else:
-        depth = 4
+        depth = 6
         if game_state.number_of_moves == 0:
             return 3
 
