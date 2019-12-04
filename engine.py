@@ -272,21 +272,6 @@ def heuristic_function_4(game_state, move):
               [0, 0, 0, 0, 0, 0, 0]]
     return values[row][move]
 
-def evaluate_move_negamax(game_state, depth, move):
-    """The value is higher the better the position is for the player
-    that made the last move.
-    """
-    game_state.make_move(move)
-    value = -negamax(game_state, depth)
-    game_state.undo_last_move()
-    return value
-
-def evaluate_move_negamax1(game_state, depth, move, pruning):
-    game_state.make_move(move)
-    value = negamax(game_state, depth)*game_state.player_in_turn
-    game_state.undo_last_move()
-    return value
-
 def heuristic_move(game_state, move_list, heuristic_function):
     """Return a move from move_list that is given the highest value by
     heuristic_function. It there are several such moves, then one of
