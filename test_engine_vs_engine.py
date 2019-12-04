@@ -1,14 +1,14 @@
 
-from engine1 import EngineInterface as EngineInterface1
-from engine1 import GameState as GameState1
-from engine2 import EngineInterface as EngineInterface2
-from engine2 import GameState as GameState2
+from engine import EngineInterface as EngineInterface1
+from engine import GameState as GameState1
+from test_engine import EngineInterface as EngineInterface2
+from test_engine import GameState as GameState2
 import time
 
 engine_interface_1 = EngineInterface1(3)
-engine_interface_1.name = "engine1"
+engine_interface_1.name = "engine"
 engine_interface_2 = EngineInterface2(3)
-engine_interface_2.name = "engine2"
+engine_interface_2.name = "test_engine"
 
 def game(engine1, game_state1, engine2, game_state2, print_move_times=False):
     """engine1 and engine2 are instances of EngineInterface.
@@ -23,9 +23,9 @@ def game(engine1, game_state1, engine2, game_state2, print_move_times=False):
     total_time_engine_1 = 0
     total_time_engine_2 = 0
     while True:
-        t0 = time.clock()
+        t0 = time.perf_counter()
         column_number = engine1.engine_move(game_state1)
-        t1 = time.clock()
+        t1 = time.perf_counter()
         total_time_engine_1 += t1 - t0
         if print_move_times:
             print(engine1.name + ": Move time:", t1 - t0, "s")
@@ -39,9 +39,9 @@ def game(engine1, game_state1, engine2, game_state2, print_move_times=False):
             print_total_times()
             print("Draw\n")
             return (0, total_time_engine_1, total_time_engine_2)
-        t0 = time.clock()
+        t0 = time.perf_counter()
         column_number = engine2.engine_move(game_state2)
-        t1 = time.clock()
+        t1 = time.perf_counter()
         total_time_engine_2 += t1 - t0
         if print_move_times:
             print(engine2.name + ": Move time:", t1 - t0, "s")

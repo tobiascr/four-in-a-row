@@ -183,11 +183,10 @@ def win_last_move(game_state):
     row = game_state.column_height[col] - 1
     return four_in_a_row(game_state, col, row)
 
-def minimax(game_state, depth, alpha=-10000, beta=10000):
-    """Maximizes if the player in the last move is 1 and minimizes if -1."""
+def negamax(game_state, depth, alpha=-10000, beta=10000):
     # If terminal node (win or board full).
     if win_last_move(game_state):
-        return -(1000 + depth) * game_state.player_in_turn
+        return -(1000 + depth)
     if game_state.number_of_moves == 42:
         return 0
 
@@ -196,40 +195,18 @@ def minimax(game_state, depth, alpha=-10000, beta=10000):
         return 0
 
     # Else, return a value based on child node values.
-    values = []
     available_moves = game_state.available_moves()
 
-
-    if game_state.player_in_turn == 1:
-        # Testing central moves first combined with pruning saves time.
-        for move in [3,2,4,1,5,0,6]:
-            if move in available_moves:
-                game_state.make_move(move)
-                new_value = minimax(game_state, depth-1, alpha, beta)
-                values.append(new_value)
-                game_state.undo_last_move()
-                alpha = max(alpha, new_value)
-                if beta <= alpha:
-                    break
-    else:
-        # Testing central moves first combined with pruning saves time.
-        for move in [3,2,4,1,5,0,6]:
-            if move in available_moves:
-                game_state.make_move(move)
-                new_value = minimax(game_state, depth-1, alpha, beta)
-                values.append(new_value)
-                game_state.undo_last_move()
-                beta = min(beta, new_value)
-                if beta <= alpha:
-                    break
-
-    # If maximizing player made the last move.
-    if game_state.player_in_turn == -1:
-        return min(values)
-
-    # If minimizing player made the last move.
-    else:
-        return max(values)
+    # Testing central moves first combined with pruning saves time.
+    for move in [3,2,4,1,5,0,6]:
+        if move in available_moves:
+            game_state.make_move(move)
+            new_value = -negamax(game_state, depth-1, -beta, -alpha)
+            game_state.undo_last_move()
+            alpha = max(alpha, new_value)
+            if beta <= alpha:
+                break
+    return alpha
 
 def heuristic_function_constant(game_state, move):
     return 0
@@ -295,9 +272,18 @@ def heuristic_function_4(game_state, move):
               [0, 0, 0, 0, 0, 0, 0]]
     return values[row][move]
 
-def evaluate_move_minimax(game_state, depth, move, pruning):
+def evaluate_move_negamax(game_state, depth, move):
+    """The value is higher the better the position is for the player
+    that made the last move.
+    """
     game_state.make_move(move)
-    value = minimax(game_state, depth)
+    value = -negamax(game_state, depth)
+    game_state.undo_last_move()
+    return value
+
+def evaluate_move_negamax1(game_state, depth, move, pruning):
+    game_state.make_move(move)
+    value = negamax(game_state, depth)*game_state.player_in_turn
     game_state.undo_last_move()
     return value
 
@@ -316,7 +302,7 @@ def heuristic_move(game_state, move_list, heuristic_function):
 
 def blocking_moves(game_state):
     """Return a list of moves that blocks an immediate four in a row for the opponent if
-    such move exist.
+    such move exists.
     """
     move_list = []
     for col in game_state.available_moves():
@@ -367,64 +353,40 @@ def computer_move(game_state, depth, heuristic_function):
     and heuristic evaluations.
     """
     def best_moves(move_list, value_list):
-        if maximizing:
-            best_value = max(value_list)
-        else:
-            best_value = min(value_list)
+        best_value = max(value_list)
         return [move_list[i] for i in range(len(move_list))
                 if value_list[i] == best_value]
 
     available_moves = game_state.available_moves()
+
+    # The moves are shuffled in order to make the move order
+    # more natural for weak heuristic functions.
+    random.shuffle(available_moves)
+
     maximizing = game_state.player_in_turn == 1
 
-    # Look for moves that are winning, losing or neutral.
-    winning_moves = []
-    neutral_moves = []
-    losing_moves = []
-    pruning = True
+    def search_key(move):
+        return heuristic_function(game_state, move)
+
+    # The available moves are sorted based on the heuristic function.
+    available_moves.sort(key=search_key, reverse=True)
+
+    alpha = -10000
+    beta = 10000
     for move in available_moves:
-        value = evaluate_move_minimax(game_state, depth, move, pruning)
-        if maximizing:
-            if value > 0:
-                winning_moves.append(move)
-            elif value < 0:
-                losing_moves.append(move)
-            else:
-                neutral_moves.append(move)
-        else:
-            if value < 0:
-                winning_moves.append(move)
-            elif value > 0:
-                losing_moves.append(move)
-            else:
-                neutral_moves.append(move)
-
-    # If there is exactly one winning move, return that move.
-    if len(winning_moves) == 1:
-        return winning_moves[0]
-
-    # If there are several winning moves, chose one that gives a fast win.
-    if len(winning_moves) > 1:
-        pruning = False
-        minimax_values = [evaluate_move_minimax(game_state, 4, move, pruning)
-                          for move in winning_moves]
-        return random.choice(best_moves(winning_moves, minimax_values))
-
-    # If there are 0 rated moves, then chose one by using a heuristic method.
-    if neutral_moves:
-        return heuristic_move(game_state, neutral_moves, heuristic_function)
+        game_state.make_move(move)
+        new_value = -negamax(game_state, depth, -beta, -alpha)
+        game_state.undo_last_move()
+        if new_value > alpha:
+            best_move = move
+            alpha = new_value
 
     # If there are only losing moves, chose one that is blocking a four in a row
     # if there exist such moves.
-    move_list = blocking_moves(game_state)
-    if move_list:
-        return heuristic_move(game_state, move_list, heuristic_function)
+    if alpha < 0:
+        move_list = blocking_moves(game_state)
+        if move_list:
+            return heuristic_move(game_state, move_list, heuristic_function)
 
-    # If there are only losing moves and no blocking moves, chose one that gives
-    # a slow loss.
-    pruning = False
-    minimax_values = [evaluate_move_minimax(game_state, 4, move, pruning)
-                      for move in losing_moves]
-    return heuristic_move(game_state, best_moves(losing_moves, minimax_values),
-                          heuristic_function)
+    return best_move
 
