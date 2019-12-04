@@ -183,31 +183,6 @@ def win_last_move(game_state):
     row = game_state.column_height[col] - 1
     return four_in_a_row(game_state, col, row)
 
-def negamax(game_state, depth, alpha=-10000, beta=10000):
-    # If terminal node (win or board full).
-    if win_last_move(game_state):
-        return -(1000 + depth)
-    if game_state.number_of_moves == 42:
-        return 0
-
-    # If not terminal node, but depth 0.
-    if depth == 0:
-        return 0
-
-    # Else, return a value based on child node values.
-    available_moves = game_state.available_moves()
-
-    # Testing central moves first combined with pruning saves time.
-    for move in [3,2,4,1,5,0,6]:
-        if move in available_moves:
-            game_state.make_move(move)
-            new_value = -negamax(game_state, depth-1, -beta, -alpha)
-            game_state.undo_last_move()
-            alpha = max(alpha, new_value)
-            if beta <= alpha:
-                break
-    return alpha
-
 def heuristic_function_constant(game_state, move):
     return 0
 
@@ -332,6 +307,31 @@ def computer_move_level_3(game_state):
             return 3
 
     return computer_move(game_state, depth, heuristic_function_3)
+
+def negamax(game_state, depth, alpha=-10000, beta=10000):
+    # If terminal node (win or board full).
+    if win_last_move(game_state):
+        return -(1000 + depth)
+    if game_state.number_of_moves == 42:
+        return 0
+
+    # If not terminal node, but depth 0.
+    if depth == 0:
+        return 0
+
+    # Else, return a value based on child node values.
+    available_moves = game_state.available_moves()
+
+    # Testing central moves first combined with pruning saves time.
+    for move in [3,2,4,1,5,0,6]:
+        if move in available_moves:
+            game_state.make_move(move)
+            new_value = -negamax(game_state, depth-1, -beta, -alpha)
+            game_state.undo_last_move()
+            alpha = max(alpha, new_value)
+            if beta <= alpha:
+                break
+    return alpha
 
 def computer_move(game_state, depth, heuristic_function):
     """Return a move computed by using the minimax algorithm
