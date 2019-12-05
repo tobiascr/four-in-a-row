@@ -130,6 +130,10 @@ class GameState:
         self.player_in_turn = -self.player_in_turn
         self.number_of_moves -= 1
 
+    def key(self):
+        """Return a unique key for the position that can be used in a dictionary."""
+        return str(self.board)
+
 def four_in_a_row(game_state, col, row):
     """True iff there is a four in a row that includes the position (col, row)."""
     position = 10 + col + row * 9
@@ -328,6 +332,9 @@ def computer_move_level_3(game_state):
     return computer_move(game_state, depth, heuristic_function_3)
 
 def negamax(game_state, depth, alpha=-10000, beta=10000):
+
+    global transposition_table
+
     # If terminal node (win or board full).
     if win_last_move(game_state):
         return -(1000 + depth)
@@ -338,7 +345,15 @@ def negamax(game_state, depth, alpha=-10000, beta=10000):
     if depth == 0:
         return 0
 
+    # Check if the transposition is in the transposition table.
+    if depth > 1:
+        key = game_state.key()
+        value = transposition_table.get(key)
+        if value != None:
+            return value
+
     # Else, return a value based on child node values.
+
     available_moves = game_state.available_moves()
 
     # Testing central moves first combined with pruning saves time.
@@ -350,6 +365,9 @@ def negamax(game_state, depth, alpha=-10000, beta=10000):
             alpha = max(alpha, new_value)
             if beta <= alpha:
                 break
+
+    if depth > 1:
+        transposition_table.update({game_state.key():alpha})
     return alpha
 
 def computer_move(game_state, depth, heuristic_function):
@@ -360,6 +378,10 @@ def computer_move(game_state, depth, heuristic_function):
         best_value = max(value_list)
         return [move_list[i] for i in range(len(move_list))
                 if value_list[i] == best_value]
+
+    # The transposition table is reset.
+    global transposition_table
+    transposition_table = dict()
 
     available_moves = game_state.available_moves()
 
