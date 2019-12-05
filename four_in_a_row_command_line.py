@@ -9,12 +9,19 @@ def draw_board(game_state, white):
     for row in range(6):
         for col in range(7):
             print("|", end="")
-            if game_state.get_value(col, 5-row) == 0:
+            if game_state.get_value(col, 5-row) == "0":
                 print(" ", end="")
-            elif game_state.get_value(col, 5-row) == white:
-                print("○", end="")
             else:
-                print("●", end="")
+                if white:
+                    if game_state.get_value(col, 5-row) == "1":
+                        print("○", end="")
+                    else:
+                        print("●", end="")
+                else:
+                    if game_state.get_value(col, 5-row) == "2":
+                        print("○", end="")
+                    else:
+                        print("●", end="")
         print("|")
     print(" 0 1 2 3 4 5 6")
 

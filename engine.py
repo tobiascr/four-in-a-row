@@ -18,7 +18,6 @@ class EngineInterface():
         """
         def disk_type(column, row):
             return game_state.board[10 + column + row * 9]
-            #return game_state.columns[column][row]
 
         def disks_are_of_same_type(col_row_pair_set):
             type_ = None
@@ -26,7 +25,7 @@ class EngineInterface():
             for (column, row) in col_row_pair_set:
                 if type_ == None:
                     type_ = disk_type(column, row)
-                if type_ == 0:
+                if type_ == "0":
                     return False
                 if disk_type(column, row) != type_:
                     all_equal = False
@@ -79,8 +78,8 @@ class EngineInterface():
 
 class GameState:
     """Instances of this object stores game states. A board configuration is stored as
-    a list of lengths 72. Empty positions are stored as 0. The players are called 1 and -1,
-    where 1 always make the first move.
+    a list of lengths 72. Empty positions are stored as "0". The players are called "1" and "2",
+    where "1" always make the first move.
 
     Some of the entries in the list is always 0. They represent the positions outside of the
     board, as in the following diagram.
@@ -105,11 +104,8 @@ class GameState:
         self.number_of_moves = 0
         self.column_height = [0,0,0,0,0,0,0]
         self.move_sequence = []
-        self.player_in_turn = 1
-        self.board = [0]*72
-        self.alt_board = ["0"]*72
-        #self.board = "0"*72
-        #self.key_history = []
+        self.player_in_turn = "1"
+        self.board = ["0"]*72
 
     def get_value(self, column, row):
         return self.board[10 + column + row * 9]
@@ -119,37 +115,28 @@ class GameState:
 
     def make_move(self, column):
         self.board[10 + column + self.column_height[column] * 9] = self.player_in_turn
-        self.alt_board[10 + column + self.column_height[column] * 9] = str(self.player_in_turn + 2)
-        move_position = 10 + column + self.column_height[column] * 9
-        #self.key_history.append(self.board)
-        #self.board = (self.board[:move_position] + str(self.player_in_turn + 2) +
-        #                  self.board[move_position + 1:])
         self.move_sequence.append(column)
         self.column_height[column] += 1
-        self.player_in_turn = -self.player_in_turn
+        if self.player_in_turn == "1":
+             self.player_in_turn = "2"
+        else:
+            self.player_in_turn = "1"
         self.number_of_moves += 1
 
     def undo_last_move(self):
         last_move = self.move_sequence[-1]
         self.column_height[last_move] -= 1
-        self.board[10 + last_move + self.column_height[last_move] * 9] = 0
-        self.alt_board[10 + last_move + self.column_height[last_move] * 9] = "0"
-        #move_position = 10 + last_move + self.column_height[last_move] * 9
-        #self.board_key = (self.board_key[:move_position] + "0" +
-        #                  self.board_key[move_position + 1:])
-        #self.board = self.key_history[-1]
-        #del self.key_history[-1]
+        self.board[10 + last_move + self.column_height[last_move] * 9] = "0"
         del self.move_sequence[-1]
-        self.player_in_turn = -self.player_in_turn
+        if self.player_in_turn == "1":
+             self.player_in_turn = "2"
+        else:
+            self.player_in_turn = "1"
         self.number_of_moves -= 1
 
     def key(self):
         """Return a unique key for the position that can be used in a dictionary."""
-        #a = "".join(self.alt_board)
-        #return str(self.board)
-        #a = str(self.board)
-        return "".join(self.alt_board)
-        #return self.board
+        return "".join(self.board)
 
 def four_in_a_row(game_state, col, row):
     """True iff there is a four in a row that includes the position (col, row)."""
@@ -224,31 +211,6 @@ def heuristic_function_1(game_state, move):
     """
     return -abs(3 - move)
 
-def heuristic_function_2(game_state, move):
-    """Give a heuristic evaluation in form of a number
-    of how good it would be to make "move" to "game_state". The value is
-    higher the better the move, regardless of the player to make it.
-
-    This function counts possible four in a rows further into the game.
-    Test shows that this function is weak compared to favouring central moves.
-    """
-    game_state.make_move(move)
-    value = -game_state.player_in_turn 
-    number_of_possible_four_in_a_rows = 0
-
-    for col in range(7):
-        for row in range(game_state.column_height[col], 6):
-            # Make a test move
-            game_state.columns[col][row] = value
-            if four_in_a_row(game_state, col, row):
-                number_of_possible_four_in_a_rows += 1
-            # Undo the move
-            game_state.columns[col][row] = 0
-
-    game_state.undo_last_move()
-
-    return number_of_possible_four_in_a_rows
-
 def heuristic_function_3(game_state, move):
     """Give a heuristic evaluation in form of a number
     of how good it would be to make "move" to "game_state". The value is
@@ -298,7 +260,10 @@ def blocking_moves(game_state):
         row = game_state.column_height[col]
 
         # Make a null move
-        game_state.player_in_turn = -game_state.player_in_turn
+        if game_state.player_in_turn == "1":
+             game_state.player_in_turn = "2"
+        else:
+            game_state.player_in_turn = "1"
 
         # Make a test move.
         game_state.make_move(col)
@@ -310,7 +275,10 @@ def blocking_moves(game_state):
         game_state.undo_last_move()
 
         # Undo the null move
-        game_state.player_in_turn = -game_state.player_in_turn
+        if game_state.player_in_turn == "1":
+             game_state.player_in_turn = "2"
+        else:
+            game_state.player_in_turn = "1"
 
     return move_list
 
