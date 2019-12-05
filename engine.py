@@ -108,6 +108,9 @@ class GameState:
         self.player_in_turn = 1
         self.board = [0]*72
 
+    def get_value(self, column, row):
+        return self.board[10 + column + row * 9]
+
     def available_moves(self):
         return [move for move in range(7) if self.column_height[move] < 6]
 

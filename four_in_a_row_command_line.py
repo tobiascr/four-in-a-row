@@ -9,9 +9,9 @@ def draw_board(game_state, white):
     for row in range(6):
         for col in range(7):
             print("|", end="")
-            if game_state.columns[col][5-row] == 0:
+            if game_state.get_value(col, 5-row) == 0:
                 print(" ", end="")
-            elif game_state.columns[col][5-row] == white:
+            elif game_state.get_value(col, 5-row) == white:
                 print("○", end="")
             else:
                 print("●", end="")
