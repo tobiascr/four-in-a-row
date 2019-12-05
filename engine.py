@@ -17,7 +17,8 @@ class EngineInterface():
         Positions are given as a set of (column, row)-pairs.
         """
         def disk_type(column, row):
-            return game_state.columns[column][row]
+            return game_state.board[10 + column + row * 9]
+            #return game_state.columns[column][row]
 
         def disks_are_of_same_type(col_row_pair_set):
             type_ = None
@@ -77,26 +78,37 @@ class EngineInterface():
 
 
 class GameState:
-    """Instances of this object stores game states. A game state is stored as
-    a list of seven lists of lengths 6. The lists inside the list correspond
-    to the columns. Empty positions are stored as 0. The players are called 1 and -1,
-    where 1 always make the first move. The first entries in the column lists corresponds to the
-    bottom positions. Some extra data are stored here that can be derived from
-    the game state, which can help to make some algorithms faster.
+    """Instances of this object stores game states. A board configuration is stored as
+    a list of lengths 72. Empty positions are stored as 0. The players are called 1 and -1,
+    where 1 always make the first move.
+
+    Some of the entries in the list is always 0. They represent the positions outside of the
+    board, as in the following diagram.
+
+    000000000
+    0xxxxxxx0
+    0xxxxxxx0
+    0xxxxxxx0
+    0xxxxxxx0
+    0xxxxxxx0
+    0xxxxxxx0
+    000000000
+
+    The positions with x are the positions on the board. The position in the lower left
+    corner have index 10, the next index 11 etc.
     """
     def __init__(self):
-        self.columns = [[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                          [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]]
         self.number_of_moves = 0
         self.column_height = [0,0,0,0,0,0,0]
         self.move_sequence = []
         self.player_in_turn = 1
+        self.board = [0]*72
 
     def available_moves(self):
         return [move for move in range(7) if self.column_height[move] < 6]
 
     def make_move(self, column):
-        self.columns[column][self.column_height[column]] = self.player_in_turn
+        self.board[10 + column + self.column_height[column] * 9] = self.player_in_turn
         self.move_sequence.append(column)
         self.column_height[column] += 1
         self.player_in_turn = -self.player_in_turn
@@ -105,73 +117,62 @@ class GameState:
     def undo_last_move(self):
         last_move = self.move_sequence[-1]
         self.column_height[last_move] -= 1
-        self.columns[last_move][self.column_height[last_move]] = 0
+        self.board[10 + last_move + self.column_height[last_move] * 9] = 0
+
         del self.move_sequence[-1]
         self.player_in_turn = -self.player_in_turn
         self.number_of_moves -= 1
 
 def four_in_a_row(game_state, col, row):
     """True iff there is a four in a row that includes the position (col, row)."""
-    player = game_state.columns[col][row]
+    position = 10 + col + row * 9
+    player = game_state.board[position]
 
-    # Columns. It might be best to try this first, because it's
-    # the fastest four in a row to test.
+    # Columns.
     if row > 2:
-        if (player ==
-            game_state.columns[col][row-1] ==
-            game_state.columns[col][row-2] ==
-            game_state.columns[col][row-3]): return True
+        in_row = 1
+        p = position - 9
+        while game_state.board[p] == player:
+            in_row += 1
+            p -= 9
+        if in_row >= 4:
+            return True
 
     # Rows
     in_row = 1
-    while col-in_row >= 0:
-        if game_state.columns[col-in_row][row] == player:
-            in_row += 1
-        else:
-            break
-    n = 1
-    while col+n <= 6:
-        if game_state.columns[col+n][row] == player:
-            in_row += 1
-            n += 1
-        else:
-            break
-
+    p = position - 1
+    while game_state.board[p] == player:
+        in_row += 1
+        p -= 1
+    p = position + 1
+    while game_state.board[p] == player:
+        in_row += 1
+        p += 1
     if in_row >= 4:
         return True
 
     # Diagonals
     in_row = 1
-    while col-in_row >= 0 and row-in_row >= 0:
-        if game_state.columns[col-in_row][row-in_row] == player:
-            in_row += 1
-        else:
-            break
-    n = 1
-    while col+n <= 6 and row+n <= 5:
-        if game_state.columns[col+n][row+n] == player:
-            in_row += 1
-            n += 1
-        else:
-            break
-
+    p = position - 10
+    while game_state.board[p] == player:
+        in_row += 1
+        p -= 10
+    p = position + 10
+    while game_state.board[p] == player:
+        in_row += 1
+        p += 10
     if in_row >= 4:
         return True
 
     in_row = 1
-    while col-in_row >= 0 and row+in_row <= 5:
-        if game_state.columns[col-in_row][row+in_row] == player:
-            in_row += 1
-        else:
-            break
-    n = 1
-    while col+n <= 6 and row-n >= 0:
-        if game_state.columns[col+n][row-n] == player:
-            in_row += 1
-            n += 1
-        else:
-            break
-
+    p = position - 8
+    while game_state.board[p] == player:
+        in_row += 1
+        p -= 8
+    p = position + 8
+    while game_state.board[p] == player:
+        in_row += 1
+        p += 8
     if in_row >= 4:
         return True
 
@@ -267,14 +268,25 @@ def blocking_moves(game_state):
     move_list = []
     for col in game_state.available_moves():
         row = game_state.column_height[col]
+
+        # Make a null move
+        game_state.player_in_turn = -game_state.player_in_turn
+
         # Make a test move.
-        game_state.columns[col][row] = -game_state.player_in_turn
+        game_state.make_move(col)
+
+        #game_state.columns[col][row] = -game_state.player_in_turn
 
         if four_in_a_row(game_state, col, row):
             move_list.append(col)
 
         # Undo the move.
-        game_state.columns[col][row] = 0
+        #game_state.columns[col][row] = 0
+        game_state.undo_last_move()
+
+        # Undo the null move
+        game_state.player_in_turn = -game_state.player_in_turn
+
     return move_list
 
 def computer_move_level_1(game_state):
