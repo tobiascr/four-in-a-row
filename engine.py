@@ -103,7 +103,7 @@ class GameState:
     def __init__(self):
         self.number_of_moves = 0
         self.column_height = [0,0,0,0,0,0,0]
-        self.move_sequence = []
+        self.move_history = []
         self.player_in_turn = "1"
         self.board = ["0"]*72
 
@@ -115,7 +115,7 @@ class GameState:
 
     def make_move(self, column):
         self.board[10 + column + self.column_height[column] * 9] = self.player_in_turn
-        self.move_sequence.append(column)
+        self.move_history.append(column)
         self.column_height[column] += 1
         if self.player_in_turn == "1":
              self.player_in_turn = "2"
@@ -124,10 +124,11 @@ class GameState:
         self.number_of_moves += 1
 
     def undo_last_move(self):
-        last_move = self.move_sequence[-1]
+        #last_move = self.move_sequence[-1]
+        last_move = self.move_history.pop()
         self.column_height[last_move] -= 1
         self.board[10 + last_move + self.column_height[last_move] * 9] = "0"
-        del self.move_sequence[-1]
+        #del self.move_sequence[-1]
         if self.player_in_turn == "1":
              self.player_in_turn = "2"
         else:
@@ -195,7 +196,7 @@ def four_in_a_row(game_state, col, row):
 
 def win_last_move(game_state):
     """True iff the last move made gives four in a row."""
-    col = game_state.move_sequence[-1]
+    col = game_state.move_history[-1]
     row = game_state.column_height[col] - 1
     return four_in_a_row(game_state, col, row)
 
