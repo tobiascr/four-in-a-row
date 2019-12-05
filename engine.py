@@ -96,6 +96,10 @@ class GameState:
 
     The positions with x are the positions on the board. The position in the lower left
     corner have index 10, the next index 11 etc.
+
+    Many times in this program, rows and columns are refered to. Rows are counted from
+    below and numbered 0, 1, ..., 5. Columns are counted from the left and are numbered
+    0, 1, ..., 6. Moves are represented by the corresponding columns the moves are made to.
     """
     def __init__(self):
         self.number_of_moves = 0
