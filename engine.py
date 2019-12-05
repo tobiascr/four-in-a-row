@@ -124,11 +124,9 @@ class GameState:
         self.number_of_moves += 1
 
     def undo_last_move(self):
-        #last_move = self.move_sequence[-1]
         last_move = self.move_history.pop()
         self.column_height[last_move] -= 1
         self.board[10 + last_move + self.column_height[last_move] * 9] = "0"
-        #del self.move_sequence[-1]
         if self.player_in_turn == "1":
              self.player_in_turn = "2"
         else:
@@ -336,12 +334,8 @@ def negamax(game_state, depth, alpha=-10000, beta=10000):
             return value
 
     # Else, return a value based on child node values.
-
-    available_moves = game_state.available_moves()
-
-    # Testing central moves first combined with pruning saves time.
     for move in [3,2,4,1,5,0,6]:
-        if move in available_moves:
+        if game_state.column_height[move] < 6:
             game_state.make_move(move)
             new_value = -negamax(game_state, depth-1, -beta, -alpha)
             game_state.undo_last_move()
