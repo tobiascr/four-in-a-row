@@ -107,6 +107,9 @@ class GameState:
         self.move_sequence = []
         self.player_in_turn = 1
         self.board = [0]*72
+        self.alt_board = ["0"]*72
+        #self.board = "0"*72
+        #self.key_history = []
 
     def get_value(self, column, row):
         return self.board[10 + column + row * 9]
@@ -116,6 +119,11 @@ class GameState:
 
     def make_move(self, column):
         self.board[10 + column + self.column_height[column] * 9] = self.player_in_turn
+        self.alt_board[10 + column + self.column_height[column] * 9] = str(self.player_in_turn + 2)
+        move_position = 10 + column + self.column_height[column] * 9
+        #self.key_history.append(self.board)
+        #self.board = (self.board[:move_position] + str(self.player_in_turn + 2) +
+        #                  self.board[move_position + 1:])
         self.move_sequence.append(column)
         self.column_height[column] += 1
         self.player_in_turn = -self.player_in_turn
@@ -125,14 +133,23 @@ class GameState:
         last_move = self.move_sequence[-1]
         self.column_height[last_move] -= 1
         self.board[10 + last_move + self.column_height[last_move] * 9] = 0
-
+        self.alt_board[10 + last_move + self.column_height[last_move] * 9] = "0"
+        #move_position = 10 + last_move + self.column_height[last_move] * 9
+        #self.board_key = (self.board_key[:move_position] + "0" +
+        #                  self.board_key[move_position + 1:])
+        #self.board = self.key_history[-1]
+        #del self.key_history[-1]
         del self.move_sequence[-1]
         self.player_in_turn = -self.player_in_turn
         self.number_of_moves -= 1
 
     def key(self):
         """Return a unique key for the position that can be used in a dictionary."""
-        return str(self.board)
+        #a = "".join(self.alt_board)
+        #return str(self.board)
+        #a = str(self.board)
+        return "".join(self.alt_board)
+        #return self.board
 
 def four_in_a_row(game_state, col, row):
     """True iff there is a four in a row that includes the position (col, row)."""
@@ -286,13 +303,10 @@ def blocking_moves(game_state):
         # Make a test move.
         game_state.make_move(col)
 
-        #game_state.columns[col][row] = -game_state.player_in_turn
-
         if four_in_a_row(game_state, col, row):
             move_list.append(col)
 
         # Undo the move.
-        #game_state.columns[col][row] = 0
         game_state.undo_last_move()
 
         # Undo the null move
@@ -388,8 +402,6 @@ def computer_move(game_state, depth, heuristic_function):
     # The moves are shuffled in order to make the move order
     # more natural for weak heuristic functions.
     random.shuffle(available_moves)
-
-    maximizing = game_state.player_in_turn == 1
 
     def search_key(move):
         return heuristic_function(game_state, move)
