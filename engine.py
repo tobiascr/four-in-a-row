@@ -327,7 +327,7 @@ def negamax(game_state, depth, alpha=-10000, beta=10000):
         return 0
 
     # Check if the transposition is in the transposition table.
-    if depth > 1:
+    if depth > 0:
         key = game_state.key()
         value = transposition_table.get(key)
         if value != None:
@@ -343,8 +343,8 @@ def negamax(game_state, depth, alpha=-10000, beta=10000):
             if beta <= alpha:
                 break
 
-    if depth > 1:
-        transposition_table.update({game_state.key():alpha})
+    if depth > 0:
+        transposition_table.update({key:alpha})
     return alpha
 
 def computer_move(game_state, depth, heuristic_function):
@@ -363,7 +363,7 @@ def computer_move(game_state, depth, heuristic_function):
     available_moves = game_state.available_moves()
 
     # The moves are shuffled in order to make the move order
-    # more natural for weak heuristic functions.
+    # more varied.
     random.shuffle(available_moves)
 
     def search_key(move):
