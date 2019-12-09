@@ -1,6 +1,7 @@
 
 from engine import EngineInterface as EngineInterface1
 from engine import GameState as GameState1
+from engine import reset_transposition_table
 from test_engine import EngineInterface as EngineInterface2
 from test_engine import GameState as GameState2
 import time
@@ -66,6 +67,7 @@ def games(engine1, engine2, number_of_games, print_move_times=False):
 
     draws = 0
     for n in range(1, number_of_games + 1):
+        reset_transposition_table()
         print("Game", n)
         if n % 2:
             game_state1 = GameState1()

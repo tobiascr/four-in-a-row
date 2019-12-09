@@ -142,7 +142,7 @@ def four_in_a_row(game_state, col, row):
     position = 10 + col + row * 9
     player = game_state.board[position]
 
-    # Columns.
+    # Columns
     if row > 2:
         in_row = 1
         p = position - 9
@@ -258,7 +258,7 @@ def blocking_moves(game_state):
     for col in game_state.available_moves():
         row = game_state.column_height[col]
 
-        # Make a null move
+        # Make a null move.
         if game_state.player_in_turn == "1":
              game_state.player_in_turn = "2"
         else:
@@ -301,24 +301,31 @@ def computer_move_level_3(game_state):
     # Depth for the minimax algorithm is chosen based
     # on the number of filled columns.
     columns = len(available_moves)
-    if columns < 3:
+    if columns < 4:
         depth = 20
-    if 3 <= columns < 5:
-        depth = 10
+    elif columns == 4:
+        depth = 12
+    elif columns == 5:
+            depth = 10
     else:
-        depth = 6
         if game_state.number_of_moves == 0:
             return 3
+        if game_state.number_of_moves < 8:
+            depth = 4
+        elif game_state.number_of_moves < 12:
+            depth = 5
+        else:
+            depth = 6
 
-    return computer_move(game_state, depth, heuristic_function_3)
+    move = computer_move(game_state, depth, heuristic_function_3)
+    return move
 
 def negamax(game_state, depth, alpha=-10000, beta=10000):
-
-    global transposition_table
 
     # If terminal node (win or board full).
     if win_last_move(game_state):
         return -(1000 + depth)
+#        return -1000
     if game_state.number_of_moves == 42:
         return 0
 
@@ -326,25 +333,38 @@ def negamax(game_state, depth, alpha=-10000, beta=10000):
     if depth == 0:
         return 0
 
-    # Check if the transposition is in the transposition table.
+    global transposition_table
+
+    moves = [3,2,4,1,5,0,6]
+
+    # Check the transposition table.
     if depth > 0:
         key = game_state.key()
-        value = transposition_table.get(key)
-        if value != None:
-            return value
+        tt_data = transposition_table.get(key)
+        if tt_data != None:
+            (tt_depth, tt_best_move, tt_lower_bound) = tt_data
+            if depth == tt_depth:
+                return tt_lower_bound
+            else:
+                moves.remove(tt_best_move)
+                moves.insert(0, tt_best_move)
 
     # Else, return a value based on child node values.
-    for move in [3,2,4,1,5,0,6]:
+    lower_bound = -10000
+    for move in moves:
         if game_state.column_height[move] < 6:
             game_state.make_move(move)
             new_value = -negamax(game_state, depth-1, -beta, -alpha)
             game_state.undo_last_move()
             alpha = max(alpha, new_value)
+            if new_value > lower_bound:
+                lower_bound = new_value
+                best_move = move
             if beta <= alpha:
                 break
 
     if depth > 0:
-        transposition_table.update({key:alpha})
+        transposition_table.update({key:(depth, best_move, lower_bound)})
     return alpha
 
 def computer_move(game_state, depth, heuristic_function):
@@ -356,14 +376,11 @@ def computer_move(game_state, depth, heuristic_function):
         return [move_list[i] for i in range(len(move_list))
                 if value_list[i] == best_value]
 
-    # The transposition table is reset.
-    global transposition_table
-    transposition_table = dict()
-
     available_moves = game_state.available_moves()
 
     # The moves are shuffled in order to make the move order
-    # more varied.
+    # more varied. This makes usage of the transposition table slower.
+    # But it actually appear to make the engine stronger.
     random.shuffle(available_moves)
 
     def search_key(move):
@@ -391,3 +408,8 @@ def computer_move(game_state, depth, heuristic_function):
 
     return best_move
 
+def reset_transposition_table():
+    global transposition_table
+    transposition_table = dict()
+
+transposition_table = dict()
