@@ -2,22 +2,33 @@ import random
 
 
 class EngineInterface():
-    """This class and the GameState class is intended to be the interface for this module.
-    """
+    """This class is intended to be the interface for this module."""
     def __init__(self, difficulty_level):
         """difficulty_level can be 1, 2 or 3."""
+        self.game_state = GameState()
         self.difficulty_level = difficulty_level
+        reset_transposition_table()
 
-    def four_in_a_row(self, game_state):
+    def legal(self, column):
+        """Return true iff the move is legal"""
+        return self.game_state.column_height < 6
+
+    def make_move(self, column):
+        self.game_state.make_move(column)
+
+    def draw(self):
+        return self.game_state.number_of_moves == 42
+
+    def four_in_a_row(self):
         """Return true if and only the last move made four in a row."""
-        return win_last_move(game_state)
+        return win_last_move(self.game_state)
 
-    def four_in_a_row_positions(self, game_state):
+    def four_in_a_row_positions(self):
         """Return all positions on the board that have disks included in a four in a row.
         Positions are given as a set of (column, row)-pairs.
         """
         def disk_type(column, row):
-            return game_state.board[10 + column + row * 9]
+            return self.game_state.board[10 + column + row * 9]
 
         def disks_are_of_same_type(col_row_pair_set):
             type_ = None
@@ -65,15 +76,15 @@ class EngineInterface():
 
         return four_in_a_rows
 
-    def engine_move(self, game_state):
+    def engine_move(self):
         """Return an integer from 0 to 6 that represents a move made
         by the engine."""
         if self.difficulty_level == 1:
-            return computer_move_level_1(game_state)
+            return computer_move_level_1(self.game_state)
         if self.difficulty_level == 2:
-            return computer_move_level_2(game_state)
+            return computer_move_level_2(self.game_state)
         if self.difficulty_level == 3:
-            return computer_move_level_3(game_state)
+            return computer_move_level_3(self.game_state)
 
 
 class GameState:
