@@ -9,9 +9,19 @@ class EngineInterface():
         self.difficulty_level = difficulty_level
         reset_transposition_table()
 
+    def new_game(self):
+        self.game_state = GameState()
+        reset_transposition_table()
+
+    def board_value(self, column, row):
+        """Return "0" for an empty position, "1" for a first player disk and
+        "2" for a second player disk.
+        """
+        return self.game_state.get_value(column, row)
+
     def legal(self, column):
         """Return true iff the move is legal"""
-        return self.game_state.column_height < 6
+        return self.game_state.column_height[column] < 6
 
     def make_move(self, column):
         self.game_state.make_move(column)

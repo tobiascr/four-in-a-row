@@ -70,9 +70,8 @@ class MainWindow(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.dont_close_window) # Disable close window
 
         # Player make a move, if there is empty places left in the column.
-        column_height = game_state.column_height[column_number]
-        if column_height < 6:
-            game_state.make_move(column_number)
+        if engine_interface.legal(column_number):
+            engine_interface.make_move(column_number)
             self.board.add_disk_to_top_of_column(column_number, self.player_color, self.animations)
             self.update_idletasks()
         else:
@@ -80,7 +79,7 @@ class MainWindow(tk.Tk):
             return
 
         # If player win.
-        if engine_interface.four_in_a_row(game_state):
+        if engine_interface.four_in_a_row():
             self.score[0] += 1
             self.title_update()
             self.highlight_four_in_a_row(self.player_color)
@@ -89,14 +88,14 @@ class MainWindow(tk.Tk):
             return
 
         # If draw.
-        if game_state.number_of_moves == 42:
+        if engine_interface.draw():
             self.update_and_pause(600)
             dialog("Draw")
             return
 
         # Engine makes a move
-        column_number = engine_interface.engine_move(game_state)
-        game_state.make_move(column_number)
+        column_number = engine_interface.engine_move()
+        engine_interface.make_move(column_number)
         if self.animations:
             self.update_and_pause(50)
         else:
@@ -104,7 +103,7 @@ class MainWindow(tk.Tk):
         self.board.add_disk_to_top_of_column(column_number, self.engine_color, self.animations)
 
         # If engine win.
-        if engine_interface.four_in_a_row(game_state):
+        if engine_interface.four_in_a_row():
             self.score[1] += 1
             self.title_update()
             self.highlight_four_in_a_row(self.engine_color)
@@ -113,7 +112,7 @@ class MainWindow(tk.Tk):
             return
 
         # If draw.
-        if game_state.number_of_moves == 42:
+        if engine_interface.draw():
             self.update_and_pause(600)
             dialog("Draw")
             return
@@ -121,7 +120,7 @@ class MainWindow(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.close_window) # Enable close window
 
     def highlight_four_in_a_row(self, color):
-        positions = engine_interface.four_in_a_row_positions(game_state)
+        positions = engine_interface.four_in_a_row_positions()
         self.update_and_pause(500)
         for (column, row) in positions:
             self.board.remove_disk(column, row)
@@ -132,12 +131,12 @@ class MainWindow(tk.Tk):
     def new_game(self):
         self.new_game_flag = False
         self.player_make_first_move = not self.player_make_first_move
-        game_state.__init__()
+        engine_interface.new_game()
         self.board.remove_all_disks()
 
         if not self.player_make_first_move:
-            column_number = engine_interface.engine_move(game_state)
-            game_state.make_move(column_number)
+            column_number = engine_interface.engine_move()
+            engine_interface.make_move(column_number)
             self.update_and_pause(300)
             self.board.add_disk_to_top_of_column(column_number, self.engine_color, self.animations)
 
@@ -332,8 +331,6 @@ class DialogBox(tk.Toplevel):
     def quit(self, event=None):
         self.destroy()
 
-
-game_state = GameState()
 engine_interface = EngineInterface(2)
 main_window = MainWindow()
 main_window.update()
