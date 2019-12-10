@@ -336,7 +336,6 @@ def negamax(game_state, depth, alpha=-10000, beta=10000, only_win=True):
     # If terminal node (win or board full).
     if game_state.four_in_a_row():
         return -(1000 + depth)
-#        return -1000
     if game_state.number_of_moves == 42:
         return 0
 
@@ -391,10 +390,12 @@ def computer_move(game_state, depth, heuristic_function):
 
     available_moves = game_state.available_moves()
 
-    # The moves are shuffled in order to make the move order
-    # more varied. This makes usage of the transposition table slower.
-    # But it actually appear to make the engine stronger.
-    random.shuffle(available_moves)
+    # Opening moves are shuffled before they are sorted in order to make the move order
+    # more varied. Shuffling every move make the engine weaker. Maybe because the moves
+    # gets more spread out over the board. Maybe a good heuristic can be to put the moves
+    # closer to the last moves.
+    if game_state.number_of_moves < 6:
+        random.shuffle(available_moves)
 
     def search_key(move):
         return heuristic_function(game_state, move)
