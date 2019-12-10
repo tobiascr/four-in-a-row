@@ -92,4 +92,4 @@ def games(engine1, engine2, number_of_games, print_move_times=False):
     print(engine1.name + " total time:", engine1_time, "s")
     print(engine2.name + " total time:", engine2_time, "s")
 
-games(engine_interface_1, engine_interface_2, 40, False)
+games(engine_interface_1, engine_interface_2, 100, False)

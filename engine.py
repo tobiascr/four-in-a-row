@@ -315,16 +315,16 @@ def computer_move_level_3(game_state):
     if columns < 4:
         depth = 20
     elif columns == 4:
-        depth = 12
+        depth = 14 #12 
     elif columns == 5:
-            depth = 10
+            depth = 12
     else:
         if game_state.number_of_moves == 0:
             return 3
         if game_state.number_of_moves < 8:
-            depth = 4
+            depth = 6
         elif game_state.number_of_moves < 12:
-            depth = 5
+            depth = 6
         else:
             depth = 6
 
