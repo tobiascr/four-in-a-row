@@ -135,24 +135,25 @@ class GameState:
         return [move for move in range(7) if self.column_height[move] < 6]
 
     def make_move(self, column):
-        self.board[10 + column + self.column_height[column] * 9] = self.player_in_turn
+        if self.number_of_moves % 2 == 0:
+            self.board[10 + column + self.column_height[column] * 9] = "1"
+        else:
+            self.board[10 + column + self.column_height[column] * 9] = "2"
         self.move_history.append(column)
         self.column_height[column] += 1
-        if self.player_in_turn == "1":
-             self.player_in_turn = "2"
-        else:
-            self.player_in_turn = "1"
         self.number_of_moves += 1
 
     def undo_last_move(self):
         last_move = self.move_history.pop()
         self.column_height[last_move] -= 1
         self.board[10 + last_move + self.column_height[last_move] * 9] = "0"
-        if self.player_in_turn == "1":
-             self.player_in_turn = "2"
-        else:
-            self.player_in_turn = "1"
         self.number_of_moves -= 1
+
+    def make_null_move(self):
+       self.number_of_moves += 1
+
+    def undo_null_move(self):
+       self.number_of_moves -= 1
 
     def key(self):
         """Return a unique key for the position that can be used in a dictionary."""
@@ -283,11 +284,7 @@ def blocking_moves(game_state):
     for col in game_state.available_moves():
         row = game_state.column_height[col]
 
-        # Make a null move.
-        if game_state.player_in_turn == "1":
-             game_state.player_in_turn = "2"
-        else:
-            game_state.player_in_turn = "1"
+        game_state.make_null_move()
 
         # Make a test move.
         game_state.make_move(col)
@@ -295,14 +292,8 @@ def blocking_moves(game_state):
         if game_state.four_in_a_row():
             move_list.append(col)
 
-        # Undo the move.
         game_state.undo_last_move()
-
-        # Undo the null move
-        if game_state.player_in_turn == "1":
-             game_state.player_in_turn = "2"
-        else:
-            game_state.player_in_turn = "1"
+        game_state.undo_null_move()
 
     return move_list
 
@@ -348,7 +339,6 @@ def computer_move_level_3(game_state):
 def negamax(game_state, depth, alpha=-10000, beta=10000):
 
     # If terminal node (win or board full).
-#    if win_last_move(game_state):
     if game_state.four_in_a_row():
         return -(1000 + depth)
 #        return -1000
