@@ -31,7 +31,7 @@ class EngineInterface():
 
     def four_in_a_row(self):
         """Return true if and only the last move made four in a row."""
-        return win_last_move(self.game_state)
+        return self.game_state.four_in_a_row()
 
     def four_in_a_row_positions(self):
         """Return all positions on the board that have disks included in a four in a row.
@@ -158,66 +158,63 @@ class GameState:
         """Return a unique key for the position that can be used in a dictionary."""
         return "".join(self.board)
 
-def four_in_a_row(game_state, col, row):
-    """True iff there is a four in a row that includes the position (col, row)."""
-    position = 10 + col + row * 9
-    player = game_state.board[position]
+    def four_in_a_row(self):
+        """True iff there is a four in a row that goes through the last made move."""
+        col = self.move_history[-1]
+        row = self.column_height[col] - 1
+        position = 10 + col + row * 9
+        player = self.board[position]
 
-    # Columns
-    if row > 2:
+        # Columns
+        if row > 2:
+            in_row = 1
+            p = position - 9
+            while self.board[p] == player:
+                in_row += 1
+                p -= 9
+            if in_row >= 4:
+                return True
+
+        # Rows
         in_row = 1
-        p = position - 9
-        while game_state.board[p] == player:
+        p = position - 1
+        while self.board[p] == player:
             in_row += 1
-            p -= 9
+            p -= 1
+        p = position + 1
+        while self.board[p] == player:
+            in_row += 1
+            p += 1
         if in_row >= 4:
             return True
 
-    # Rows
-    in_row = 1
-    p = position - 1
-    while game_state.board[p] == player:
-        in_row += 1
-        p -= 1
-    p = position + 1
-    while game_state.board[p] == player:
-        in_row += 1
-        p += 1
-    if in_row >= 4:
-        return True
+        # Diagonals
+        in_row = 1
+        p = position - 10
+        while self.board[p] == player:
+            in_row += 1
+            p -= 10
+        p = position + 10
+        while self.board[p] == player:
+            in_row += 1
+            p += 10
+        if in_row >= 4:
+            return True
 
-    # Diagonals
-    in_row = 1
-    p = position - 10
-    while game_state.board[p] == player:
-        in_row += 1
-        p -= 10
-    p = position + 10
-    while game_state.board[p] == player:
-        in_row += 1
-        p += 10
-    if in_row >= 4:
-        return True
+        in_row = 1
+        p = position - 8
+        while self.board[p] == player:
+            in_row += 1
+            p -= 8
+        p = position + 8
+        while self.board[p] == player:
+            in_row += 1
+            p += 8
+        if in_row >= 4:
+            return True
 
-    in_row = 1
-    p = position - 8
-    while game_state.board[p] == player:
-        in_row += 1
-        p -= 8
-    p = position + 8
-    while game_state.board[p] == player:
-        in_row += 1
-        p += 8
-    if in_row >= 4:
-        return True
+        return False
 
-    return False
-
-def win_last_move(game_state):
-    """True iff the last move made gives four in a row."""
-    col = game_state.move_history[-1]
-    row = game_state.column_height[col] - 1
-    return four_in_a_row(game_state, col, row)
 
 def heuristic_function_constant(game_state, move):
     return 0
@@ -288,7 +285,7 @@ def blocking_moves(game_state):
         # Make a test move.
         game_state.make_move(col)
 
-        if four_in_a_row(game_state, col, row):
+        if game_state.four_in_a_row():
             move_list.append(col)
 
         # Undo the move.
@@ -344,7 +341,8 @@ def computer_move_level_3(game_state):
 def negamax(game_state, depth, alpha=-10000, beta=10000):
 
     # If terminal node (win or board full).
-    if win_last_move(game_state):
+#    if win_last_move(game_state):
+    if game_state.four_in_a_row():
         return -(1000 + depth)
 #        return -1000
     if game_state.number_of_moves == 42:
