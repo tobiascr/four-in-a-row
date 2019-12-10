@@ -124,7 +124,7 @@ class GameState:
     def __init__(self):
         self.number_of_moves = 0
         self.column_height = [0,0,0,0,0,0,0]
-        self.move_history = []
+        self.move_history = [None]*42
         self.board = ["0"]*72
 
     def get_value(self, column, row):
@@ -134,19 +134,17 @@ class GameState:
         return [move for move in range(7) if self.column_height[move] < 6]
 
     def make_move(self, column):
-        if self.number_of_moves % 2 == 0:
-            self.board[10 + column + self.column_height[column] * 9] = "1"
-        else:
-            self.board[10 + column + self.column_height[column] * 9] = "2"
-        self.move_history.append(column)
+        position = 10 + column + self.column_height[column] * 9
+        self.board[position] = ("1", "2")[self.number_of_moves % 2]
+        self.move_history[self.number_of_moves] = position
         self.column_height[column] += 1
         self.number_of_moves += 1
 
     def undo_last_move(self):
-        last_move = self.move_history.pop()
-        self.column_height[last_move] -= 1
-        self.board[10 + last_move + self.column_height[last_move] * 9] = "0"
         self.number_of_moves -= 1
+        position = self.move_history[self.number_of_moves]
+        self.column_height[position % 9 - 1] -= 1
+        self.board[position] = "0"
 
     def make_null_move(self):
        self.number_of_moves += 1
@@ -160,13 +158,11 @@ class GameState:
 
     def four_in_a_row(self):
         """True iff there is a four in a row that goes through the last made move."""
-        col = self.move_history[-1]
-        row = self.column_height[col] - 1
-        position = 10 + col + row * 9
+        position = self.move_history[self.number_of_moves - 1]
         player = self.board[position]
 
         # Columns
-        if row > 2:
+        if position // 9 >= 4:
             if self.board[position - 9] == player:
                 if self.board[position - 18] == player:
                     if self.board[position - 27] == player:
@@ -335,8 +331,8 @@ def computer_move_level_3(game_state):
     move = computer_move(game_state, depth, heuristic_function_3)
     return move
 
-def negamax(game_state, depth, alpha=-10000, beta=10000):
-
+def negamax(game_state, depth, alpha=-10000, beta=10000, only_win=True):
+    """If only_win=True the engine does not try to win in the fewest possible moves."""
     # If terminal node (win or board full).
     if game_state.four_in_a_row():
         return -(1000 + depth)
@@ -371,10 +367,12 @@ def negamax(game_state, depth, alpha=-10000, beta=10000):
             game_state.make_move(move)
             new_value = -negamax(game_state, depth-1, -beta, -alpha)
             game_state.undo_last_move()
-            alpha = max(alpha, new_value)
             if new_value > lower_bound:
+                alpha = max(alpha, new_value)
                 lower_bound = new_value
                 best_move = move
+            if only_win and new_value > 0:
+                break
             if beta <= alpha:
                 break
 
