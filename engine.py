@@ -167,53 +167,60 @@ class GameState:
 
         # Columns
         if row > 2:
-            in_row = 1
-            p = position - 9
-            while self.board[p] == player:
-                in_row += 1
-                p -= 9
-            if in_row >= 4:
-                return True
+            if self.board[position - 9] == player:
+                if self.board[position - 18] == player:
+                    if self.board[position - 27] == player:
+                        return True
 
         # Rows
         in_row = 1
-        p = position - 1
-        while self.board[p] == player:
+        if self.board[position - 1] == player:
             in_row += 1
-            p -= 1
-        p = position + 1
-        while self.board[p] == player:
+            if self.board[position - 2] == player:
+                in_row += 1
+                if self.board[position - 3] == player:
+                    in_row += 1
+        if self.board[position + 1] == player:
             in_row += 1
-            p += 1
+            if self.board[position + 2] == player:
+                in_row += 1
+                if self.board[position + 3] == player:
+                    in_row += 1
         if in_row >= 4:
             return True
 
         # Diagonals
         in_row = 1
-        p = position - 10
-        while self.board[p] == player:
+        if self.board[position - 10] == player:
             in_row += 1
-            p -= 10
-        p = position + 10
-        while self.board[p] == player:
+            if self.board[position - 20] == player:
+                in_row += 1
+                if self.board[position - 30] == player:
+                    in_row += 1
+        if self.board[position + 10] == player:
             in_row += 1
-            p += 10
+            if self.board[position + 20] == player:
+                in_row += 1
+                if self.board[position + 30] == player:
+                    in_row += 1
         if in_row >= 4:
             return True
 
         in_row = 1
-        p = position - 8
-        while self.board[p] == player:
+        if self.board[position - 8] == player:
             in_row += 1
-            p -= 8
-        p = position + 8
-        while self.board[p] == player:
+            if self.board[position - 16] == player:
+                in_row += 1
+                if self.board[position - 24] == player:
+                    in_row += 1
+        if self.board[position + 8] == player:
             in_row += 1
-            p += 8
+            if self.board[position + 16] == player:
+                in_row += 1
+                if self.board[position + 24] == player:
+                    in_row += 1
         if in_row >= 4:
             return True
-
-        return False
 
 
 def heuristic_function_constant(game_state, move):
