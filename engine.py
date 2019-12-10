@@ -333,7 +333,7 @@ def computer_move_level_3(game_state):
     move = computer_move(game_state, depth, heuristic_function_4)
     return move
 
-def negamax(game_state, depth, alpha=-10000, beta=10000, only_win=True):
+def negamax(game_state, depth, alpha=-10000, beta=10000, only_win=False):
     """If only_win=True the engine does not try to win in the fewest possible moves."""
     # If terminal node (win or board full).
     if game_state.four_in_a_row():
