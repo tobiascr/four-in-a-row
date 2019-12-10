@@ -130,9 +130,6 @@ class GameState:
     def get_value(self, column, row):
         return self.board[10 + column + row * 9]
 
-    def available_moves(self):
-        return [move for move in range(7) if self.column_height[move] < 6]
-
     def make_move(self, column):
         position = 10 + column + self.column_height[column] * 9
         self.board[position] = ("1", "2")[self.number_of_moves % 2]
@@ -317,18 +314,18 @@ def computer_move_level_3(game_state):
     if columns < 4:
         depth = 20
     elif columns == 4:
-        depth = 14
+        depth = 15 #14
     elif columns == 5:
-            depth = 12
+            depth = 13 #12
     else:
         if game_state.number_of_moves == 0:
             return 3
         if game_state.number_of_moves < 8:
-            depth = 6
+            depth = 6 #6 
         elif game_state.number_of_moves < 12:
-            depth = 6
+            depth = 6 #6
         else:
-            depth = 6
+            depth = 7 #6
 
     move = computer_move(game_state, depth, heuristic_function_4)
     return move
@@ -392,7 +389,7 @@ def computer_move(game_state, depth, heuristic_function):
 
     print_values = False
 
-    available_moves = game_state.available_moves()
+    available_moves = [move for move in [3,2,4,1,5,0,6] if game_state.column_height[move] < 6]
 
     # Opening moves are shuffled before they are sorted in order to make the move order
     # more varied. Shuffling every move make the engine weaker. Maybe because the moves
@@ -406,6 +403,8 @@ def computer_move(game_state, depth, heuristic_function):
 
     # The available moves are sorted based on the heuristic function.
     available_moves.sort(key=search_key, reverse=True)
+
+    #print(available_moves)
 
     alpha = -10000
     beta = 10000
