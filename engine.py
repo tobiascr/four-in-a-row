@@ -275,7 +275,9 @@ def blocking_moves(game_state):
     such move exists.
     """
     move_list = []
-    for col in game_state.available_moves():
+    available_moves = [move for move in [3,2,4,1,5,0,6] if game_state.column_height[move] < 6]
+
+    for col in available_moves:
         row = game_state.column_height[col]
 
         game_state.make_null_move()
@@ -306,7 +308,7 @@ def computer_move_level_2(game_state):
         return computer_move(game_state, 3, heuristic_function_4)
 
 def computer_move_level_3(game_state):
-    available_moves = game_state.available_moves()
+    available_moves = [move for move in [3,2,4,1,5,0,6] if game_state.column_height[move] < 6]
 
     # Depth for the minimax algorithm is chosen based
     # on the number of filled columns.
