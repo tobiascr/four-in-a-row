@@ -390,6 +390,8 @@ def computer_move(game_state, depth, heuristic_function):
         return [move_list[i] for i in range(len(move_list))
                 if value_list[i] == best_value]
 
+    print_values = False
+
     available_moves = game_state.available_moves()
 
     # Opening moves are shuffled before they are sorted in order to make the move order
@@ -414,6 +416,11 @@ def computer_move(game_state, depth, heuristic_function):
         if new_value > alpha:
             best_move = move
             alpha = new_value
+        if print_values:
+            print("Move:", move, " Value:", new_value)
+
+    if print_values:
+        print()
 
     # If there are only losing moves, chose one that is blocking a four in a row
     # if there exist such moves.
