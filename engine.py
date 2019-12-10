@@ -245,8 +245,7 @@ def heuristic_function_4(game_state, move):
     higher the better the move, regardless of the player to make it.
 
     This function give higher values to more central positions.
-    At higher depth calculations this heuristic appear to be better than heuristic_function_3,
-    but it's depending on it's opponent which is the best.
+    At higher depth calculations this heuristic appear to be better than heuristic_function_3.
     """
     row = game_state.column_height[move]
     values = [[0, 0, 0, 0, 0, 0, 0],
@@ -316,9 +315,9 @@ def computer_move_level_3(game_state):
     if columns < 4:
         depth = 20
     elif columns == 4:
-        depth = 15 #14
+        depth = 14 #15
     elif columns == 5:
-            depth = 13 #12
+            depth = 12 #13
     else:
         if game_state.number_of_moves == 0:
             return 3
@@ -327,7 +326,7 @@ def computer_move_level_3(game_state):
         elif game_state.number_of_moves < 12:
             depth = 6 #6
         else:
-            depth = 7 #6
+            depth = 6 #7
 
     move = computer_move(game_state, depth, heuristic_function_4)
     return move
@@ -393,12 +392,11 @@ def computer_move(game_state, depth, heuristic_function):
 
     available_moves = [move for move in [3,2,4,1,5,0,6] if game_state.column_height[move] < 6]
 
-    # Opening moves are shuffled before they are sorted in order to make the move order
-    # more varied. Shuffling every move make the engine weaker. Maybe because the moves
-    # gets more spread out over the board. Maybe a good heuristic can be to put the moves
-    # closer to the last moves.
-    if game_state.number_of_moves < 6:
-        random.shuffle(available_moves)
+    # Moves are shuffled before they are sorted in order to make the move order
+    # more varied. Shuffling take longer time, maybe because of less optimal usage of
+    # the transposition table, but it anyway appear to give a stronger engine, even if
+    # the depth level is lowered.
+    random.shuffle(available_moves)
 
     def search_key(move):
         return heuristic_function(game_state, move)
