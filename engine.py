@@ -248,6 +248,8 @@ def heuristic_function_4(game_state, move):
     higher the better the move, regardless of the player to make it.
 
     This function give higher values to more central positions.
+    At higher depth calculations this heuristic appear to be better than heuristic_function_3,
+    but it's depending on it's opponent which is the best.
     """
     row = game_state.column_height[move]
     values = [[0, 0, 0, 0, 0, 0, 0],
@@ -315,7 +317,7 @@ def computer_move_level_3(game_state):
     if columns < 4:
         depth = 20
     elif columns == 4:
-        depth = 14 #12 
+        depth = 14
     elif columns == 5:
             depth = 12
     else:
@@ -328,7 +330,7 @@ def computer_move_level_3(game_state):
         else:
             depth = 6
 
-    move = computer_move(game_state, depth, heuristic_function_3)
+    move = computer_move(game_state, depth, heuristic_function_4)
     return move
 
 def negamax(game_state, depth, alpha=-10000, beta=10000, only_win=True):
