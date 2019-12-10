@@ -125,7 +125,6 @@ class GameState:
         self.number_of_moves = 0
         self.column_height = [0,0,0,0,0,0,0]
         self.move_history = []
-        self.player_in_turn = "1"
         self.board = ["0"]*72
 
     def get_value(self, column, row):
