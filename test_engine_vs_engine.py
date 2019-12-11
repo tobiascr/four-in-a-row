@@ -97,25 +97,20 @@ def games(engine1, engine2, number_of_games, print_move_times=False):
     print(engine1.name + " total time:", engine1_time, "s")
     print(engine2.name + " total time:", engine2_time, "s")
 
-def f(x):
-    print("""Let engine1 and engine2 play \n several games against each other. \n""")
-    return x*x
-
 def games_multiprocessing(engine1, engine2, number_of_games):
-    """number_of_games is best to have divisable by four, or some games might be skipped."""
     engine1_wins = 0
     engine2_wins = 0
     engine1_time = 0
     engine2_time = 0
     draws = 0
 
-    for n in range(number_of_games // 4):
+    for n in range(number_of_games // 40):
         with Pool() as p:
             output = p.map(single_game_pool_wrapper,
-               [(engine1, engine2, True), (engine1, engine2, False)]*2)
+               [(engine1, engine2, True), (engine1, engine2, False)]*20)
         i = 1
         for (result, t1, t2) in output:
-            print("Game", n*4 + i)
+            print("Game", n*40 + i)
             i += 1
             print(engine1.name + " total time:", t1)
             print(engine2.name + " total time:", t2)
@@ -138,4 +133,4 @@ def games_multiprocessing(engine1, engine2, number_of_games):
     print(engine2.name + " total time:", engine2_time, "s")
 
 #games(engine_interface_1, engine_interface_2, 40, False)
-games_multiprocessing(engine_interface_1, engine_interface_2, 80)
+games_multiprocessing(engine_interface_1, engine_interface_2, 160)
