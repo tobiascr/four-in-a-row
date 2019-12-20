@@ -127,6 +127,15 @@ class GameState:
         self.move_history = [None]*42
         self.board = ["0"]*72
 
+    def print_board(self):
+        """Print the game state."""
+        for row in range(6):
+            row_string = ""
+            for col in range(7):
+                row_string += self.get_value(col, 5-row)
+            print(row_string)
+        print()
+
     def get_value(self, column, row):
         return self.board[10 + column + row * 9]
 
@@ -322,11 +331,19 @@ def computer_move_level_3(game_state):
         if game_state.number_of_moves == 0:
             return 3
         if game_state.number_of_moves < 8:
-            depth = 6 #6 
+            depth = 6
         elif game_state.number_of_moves < 12:
-            depth = 6 #6
+            depth = 6
         else:
-            depth = 6 #7
+            depth = 6
+
+    # Some opening moves.
+    if game_state.number_of_moves == 0:
+        return 3
+    if game_state.number_of_moves == 1:
+        return 3
+    if game_state.number_of_moves == 2:
+        return 3
 
     move = computer_move(game_state, depth, heuristic_function_4)
     return move
@@ -433,5 +450,3 @@ def computer_move(game_state, depth, heuristic_function):
 def reset_transposition_table():
     global transposition_table
     transposition_table = dict()
-
-transposition_table = dict()

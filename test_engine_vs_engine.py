@@ -133,4 +133,4 @@ def games_multiprocessing(engine1, engine2, number_of_games):
     print(engine2.name + " total time:", engine2_time, "s")
 
 #games(engine_interface_1, engine_interface_2, 40, False)
-games_multiprocessing(engine_interface_1, engine_interface_2, 160)
+games_multiprocessing(engine_interface_1, engine_interface_2, 160*1)
