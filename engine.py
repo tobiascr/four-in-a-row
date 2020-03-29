@@ -224,6 +224,7 @@ class GameState:
         if in_row >= 4:
             return True
 
+        return False
 
 def heuristic_function_constant(game_state, move):
     return 0
@@ -324,9 +325,9 @@ def computer_move_level_3(game_state):
     if columns < 4:
         depth = 20
     elif columns == 4:
-        depth = 14 #15
+        depth = 14
     elif columns == 5:
-            depth = 12 #13
+            depth = 12
     else:
         if game_state.number_of_moves == 0:
             return 3
