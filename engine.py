@@ -349,8 +349,10 @@ def computer_move_level_3(game_state):
     move = computer_move(game_state, depth, heuristic_function_4)
     return move
 
-def negamax(game_state, depth, alpha=-10000, beta=10000, only_win=False):
+def negamax(game_state, depth, alpha=-10000, beta=10000):
     """If only_win=True the engine does not try to win in the fewest possible moves."""
+    original_alpha = alpha;
+
     # If terminal node (win or board full).
     if game_state.four_in_a_row():
         return -(1000 + depth)
@@ -366,35 +368,37 @@ def negamax(game_state, depth, alpha=-10000, beta=10000, only_win=False):
     moves = [3,2,4,1,5,0,6]
 
     # Check the transposition table.
-    if depth > 0:
+    use_transposition_table = depth > 0
+    if use_transposition_table:
         key = game_state.key()
         tt_data = transposition_table.get(key)
         if tt_data != None:
-            (tt_depth, tt_best_move, tt_lower_bound) = tt_data
-            if depth == tt_depth:
-                return tt_lower_bound
-            else:
-                moves.remove(tt_best_move)
-                moves.insert(0, tt_best_move)
+            (tt_depth, tt_type, tt_value) = tt_data
+
+            if tt_type == 2:
+                return tt_value
+
+            if tt_value != 0 or tt_depth >= depth:
+                if tt_value >= beta:
+                    return beta
 
     # Else, return a value based on child node values.
-    lower_bound = -10000
     for move in moves:
         if game_state.column_height[move] < 6:
             game_state.make_move(move)
-            new_value = -negamax(game_state, depth-1, -beta, -alpha)
+            value = -negamax(game_state, depth-1, -beta, -alpha)
             game_state.undo_last_move()
-            if new_value > lower_bound:
-                alpha = max(alpha, new_value)
-                lower_bound = new_value
-                best_move = move
-            if only_win and new_value > 0:
-                break
-            if beta <= alpha:
-                break
+            if value >= beta: # Fail hard beta-cutoff.
+                if use_transposition_table:
+                    transposition_table.update({key:(depth, 1, beta)})
+                return beta
+            if value > alpha:
+                alpha = value
 
-    if depth > 0:
-        transposition_table.update({key:(depth, best_move, lower_bound)})
+    if use_transposition_table:
+        if alpha > original_alpha: # Exact values.
+            if alpha != 0:
+                transposition_table.update({key:(depth, 2, alpha)})
     return alpha
 
 def computer_move(game_state, depth, heuristic_function):
