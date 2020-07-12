@@ -319,24 +319,33 @@ def computer_move_level_2(game_state):
 def computer_move_level_3(game_state):
     available_moves = [move for move in [3,2,4,1,5,0,6] if game_state.column_height[move] < 6]
 
+
     # Depth for the minimax algorithm is chosen based
     # on the number of filled columns.
     columns = len(available_moves)
     if columns < 4:
         depth = 20
+        depth = min(game_state.number_of_moves + 20, 42)
     elif columns == 4:
         depth = 14
+        depth = min(game_state.number_of_moves + 14, 42)
     elif columns == 5:
             depth = 12
+            depth = min(game_state.number_of_moves + 12, 42)
     else:
         if game_state.number_of_moves == 0:
             return 3
         if game_state.number_of_moves < 8:
             depth = 6
+            depth = min(game_state.number_of_moves + 6, 42)
         elif game_state.number_of_moves < 12:
             depth = 6
+            depth = min(game_state.number_of_moves + 6, 42)
         else:
             depth = 6
+            depth = min(game_state.number_of_moves + 6, 42)
+
+    depth = min(depth + 1, 42)
 
     # Some opening moves.
     if game_state.number_of_moves == 0:
@@ -350,17 +359,20 @@ def computer_move_level_3(game_state):
     return move
 
 def negamax(game_state, depth, alpha=-10000, beta=10000):
-    """If only_win=True the engine does not try to win in the fewest possible moves."""
+    """Compute a value of game_state. Return a positive integer for a winning game_state for
+       the player in turn, 0 for a draw or unknown outcome and a negative integer for a loss.
+       A win at move 42 give the score 1, a win at move 41 give a the score 2 etc,
+       and vice versa for losses.
+       Depth is counted as the move number at which the search is stopped. For example,
+       depth=42 give a maximum depth search."""
     original_alpha = alpha;
 
-    # If terminal node (win or board full).
+    # If terminal node.
     if game_state.four_in_a_row():
-        return -(1000 + depth)
-    if game_state.number_of_moves == 42:
-        return 0
+        return -(43 - game_state.number_of_moves)
 
-    # If not terminal node, but depth 0.
-    if depth == 0:
+    # If not terminal node, but full depth.
+    if game_state.number_of_moves == depth:
         return 0
 
     global transposition_table
@@ -386,7 +398,7 @@ def negamax(game_state, depth, alpha=-10000, beta=10000):
     for move in moves:
         if game_state.column_height[move] < 6:
             game_state.make_move(move)
-            value = -negamax(game_state, depth-1, -beta, -alpha)
+            value = -negamax(game_state, depth, -beta, -alpha)
             game_state.undo_last_move()
             if value >= beta: # Fail hard beta-cutoff.
                 if use_transposition_table:
