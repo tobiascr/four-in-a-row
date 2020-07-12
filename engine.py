@@ -162,6 +162,18 @@ class GameState:
         """Return a unique key for the position that can be used in a dictionary."""
         return "".join(self.board)
 
+    def can_win_this_move(self):
+        """Return true iff a the player in turn can make a move a move that gives
+           a four in a row."""
+        for move in range(7):
+            if self.column_height[move] < 6:
+                self.make_move(move)
+                if self.four_in_a_row():
+                    self.undo_last_move()
+                    return True
+                self.undo_last_move()
+        return False
+
     def four_in_a_row(self):
         """True iff there is a four in a row that goes through the last made move."""
         position = self.move_history[self.number_of_moves - 1]
@@ -305,20 +317,21 @@ def blocking_moves(game_state):
 def computer_move_level_1(game_state):
     x = random.random()
     if x < 0.3:
-        return computer_move(game_state, 1, heuristic_function_constant)
+        depth = min(game_state.number_of_moves + 2, 42)
     else:
-        return computer_move(game_state, 2, heuristic_function_constant)
+        depth = min(game_state.number_of_moves + 3, 42)
+    return computer_move(game_state, depth, heuristic_function_constant)
 
 def computer_move_level_2(game_state):
     x = random.random()
+    depth = min(game_state.number_of_moves + 4, 42)
     if x < 0.3:
-        return computer_move(game_state, 3, heuristic_function_constant)
+        return computer_move(game_state, depth, heuristic_function_constant)
     else:
-        return computer_move(game_state, 3, heuristic_function_4)
+        return computer_move(game_state, depth, heuristic_function_4)
 
 def computer_move_level_3(game_state):
     available_moves = [move for move in [3,2,4,1,5,0,6] if game_state.column_height[move] < 6]
-
 
     # Depth for the minimax algorithm is chosen based
     # on the number of filled columns.
@@ -364,15 +377,16 @@ def negamax(game_state, depth, alpha=-10000, beta=10000):
        A win at move 42 give the score 1, a win at move 41 give a the score 2 etc,
        and vice versa for losses.
        Depth is counted as the move number at which the search is stopped. For example,
-       depth=42 give a maximum depth search."""
+       depth=42 give a maximum depth search. This function can only be used on if the game state
+       have no four in a row."""
     original_alpha = alpha;
 
     # If terminal node.
-    if game_state.four_in_a_row():
-        return -(43 - game_state.number_of_moves)
+    if game_state.can_win_this_move():
+        return 42 - game_state.number_of_moves
 
     # If not terminal node, but full depth.
-    if game_state.number_of_moves == depth:
+    if game_state.number_of_moves == depth - 1:
         return 0
 
     global transposition_table
@@ -439,6 +453,15 @@ def computer_move(game_state, depth, heuristic_function):
     available_moves.sort(key=search_key, reverse=True)
 
     #print(available_moves)
+
+    # Look for a move that makes a four in a row.
+    for move in available_moves:
+        if game_state.column_height[move] < 6:
+            game_state.make_move(move)
+            if game_state.four_in_a_row():
+                game_state.undo_last_move()
+                return move
+            game_state.undo_last_move()
 
     alpha = -10000
     beta = 10000
