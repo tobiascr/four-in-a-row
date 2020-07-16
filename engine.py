@@ -297,21 +297,15 @@ def blocking_moves(game_state):
     """
     move_list = []
     available_moves = [move for move in [3,2,4,1,5,0,6] if game_state.column_height[move] < 6]
+    game_state.make_null_move()
 
     for col in available_moves:
-        row = game_state.column_height[col]
-
-        game_state.make_null_move()
-
-        # Make a test move.
         game_state.make_move(col)
-
         if game_state.four_in_a_row():
             move_list.append(col)
-
         game_state.undo_last_move()
-        game_state.undo_null_move()
 
+    game_state.undo_null_move()
     return move_list
 
 def computer_move_level_1(game_state):
@@ -360,6 +354,9 @@ def computer_move_level_3(game_state):
 
     depth = min(depth + 1, 42)
 
+#    if game_state.number_of_moves > 25:
+#        depth = 42
+
     # Some opening moves.
     if game_state.number_of_moves == 0:
         return 3
@@ -371,7 +368,7 @@ def computer_move_level_3(game_state):
     move = computer_move(game_state, depth, heuristic_function_4)
     return move
 
-def negamax(game_state, depth, alpha=-10000, beta=10000):
+def negamax(game_state, depth, alpha, beta):
     """Compute a value of game_state. Return a positive integer for a winning game_state for
        the player in turn, 0 for a draw or unknown outcome and a negative integer for a loss.
        A win at move 42 give the score 1, a win at move 41 give a the score 2 etc,
@@ -427,6 +424,16 @@ def negamax(game_state, depth, alpha=-10000, beta=10000):
                 transposition_table.update({key:(depth, 2, alpha)})
     return alpha
 
+def root_negamax(game_state, move_order, depth, alpha, beta):
+    for move in move_order:
+        game_state.make_move(move)
+        new_value = -negamax(game_state, depth, -beta, -alpha)
+        game_state.undo_last_move()
+        if new_value > alpha:
+            best_move = move
+            alpha = new_value
+    return best_move
+
 def computer_move(game_state, depth, heuristic_function):
     """Return a move computed by using the minimax algorithm
     and heuristic evaluations.
@@ -435,8 +442,6 @@ def computer_move(game_state, depth, heuristic_function):
         best_value = max(value_list)
         return [move_list[i] for i in range(len(move_list))
                 if value_list[i] == best_value]
-
-    print_values = False
 
     available_moves = [move for move in [3,2,4,1,5,0,6] if game_state.column_height[move] < 6]
 
@@ -452,8 +457,6 @@ def computer_move(game_state, depth, heuristic_function):
     # The available moves are sorted based on the heuristic function.
     available_moves.sort(key=search_key, reverse=True)
 
-    #print(available_moves)
-
     # Look for a move that makes a four in a row.
     for move in available_moves:
         if game_state.column_height[move] < 6:
@@ -463,29 +466,24 @@ def computer_move(game_state, depth, heuristic_function):
                 return move
             game_state.undo_last_move()
 
-    alpha = -10000
-    beta = 10000
-    for move in available_moves:
-        game_state.make_move(move)
-        new_value = -negamax(game_state, depth, -beta, -alpha)
-        game_state.undo_last_move()
-        if new_value > alpha:
-            best_move = move
-            alpha = new_value
-        if print_values:
-            print("Move:", move, " Value:", new_value)
-
-    if print_values:
-        print()
-
-    # If there are only losing moves, chose one that is blocking a four in a row
-    # if there exist such moves.
-    if alpha < 0:
+    # Look for blocking moves.
+    if game_state.number_of_moves <= 40:
         move_list = blocking_moves(game_state)
         if move_list:
             return heuristic_move(game_state, move_list, heuristic_function)
 
-    return best_move
+    alpha = -10000
+    beta = 10000
+
+#    # Iterative deepening.
+#    if depth == 42:
+#        available_moves = [move for move in [3,2,4,1,5,0,6] if game_state.column_height[move] < 6]
+#        for d in range(game_state.number_of_moves + 2, depth):
+#            best_move = root_negamax(game_state, available_moves, d, alpha, beta)
+#            available_moves = [best_move] + [move for move in [3,2,4,1,5,0,6]
+#                              if game_state.column_height[move] < 6 and move != best_move]
+
+    return root_negamax(game_state, available_moves, depth, alpha, beta)
 
 def reset_transposition_table():
     global transposition_table
